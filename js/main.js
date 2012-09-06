@@ -2,6 +2,7 @@ if(!net) var net={};
 if(!net.silverbucket) net.silverbucket={};
 if(!net.silverbucket.vidmarks) net.silverbucket.vidmarks={};
 
+
 net.silverbucket.vidmarks.navMenu = function() {
     var pub = {};
     var _ = {};
@@ -26,9 +27,19 @@ net.silverbucket.vidmarks.navMenu = function() {
     return pub;
 }();
 
+
+/** 
+ * DBModel - provides an abraction for the various remoteStorage.js modules required.
+ *
+ * requires: remoteStorage.js
+ */
 net.silverbucket.vidmarks.DBModel = function() {
     var pub = {}; // public variable and functions container
     var _ = {}; // private variable and functions container
+
+    _.modules = {}; // module objects for RS
+    _.app_namespace = 'vidmarks';
+
 
     pub.init = function() {
         console.log('- DB: init()');
@@ -38,30 +49,19 @@ net.silverbucket.vidmarks.DBModel = function() {
         remoteStorage.displayWidget('remotestorage-connect'); //after that (not before that) display widget
 
         console.log('- DB: getting priviteLists...');
-        _.bookmarks = remoteStorage.bookmarks.getPrivateList('vidmarks');
+        _.modules.bookmarks = remoteStorage.bookmarks.getPrivateList(_.app_namespace);
         //_.tags      = remoteStorage.tags.getPrivateList('vidmarks');
         //_.mappings  = remoteStorage.mappings.getPrivateList('vidmarks');
 
-        console.log('- DB: bookmarks obj:');
-        console.log(_.bookmarks);
-        //console.log('-- DB: tags');
-        //console.log(_.tags);
-        //console.log('-- DB: mappings');
-        //console.log(_.mappings);
-
-        _.bookmarks.on('error', function(err) {
+        _.modules.bookmarks.on('error', function(err) {
             console.log('DB ERROR: '+err);
         });
 
-        // XXX - this function returns only obj, not id
-        _.bookmarks.on('change', function(obj) {
+        // XXX - this function returns only obj, not id [original params were (id, obj)]
+        _.modules.bookmarks.on('change', function(obj) {
             console.log('DB CHANGE: bookmarks on(change) fired.');
             console.log(obj);
         });
-
-        //console.log('MAIN: stats');
-        //stats = _.bookmarks.getStats();
-        //console.log(stats);
     }
 
     pub.addBookmark = function(url, title, description) {
@@ -72,42 +72,137 @@ net.silverbucket.vidmarks.DBModel = function() {
             var title = 'Bookmark Title!'; 
         }
 
-        var new_id = _.bookmarks.add(url, title, description);
-        console.log('...submitted ['+url+'], got id['+new_id+']');
+        var new_id = _.modules.bookmarks.add(url, title, description);
         return new_id;
     }
 
     pub.getAll = function() {
         console.log('- DB: getAll()');
-        var ids = _.bookmarks.getIds();
-        console.log(ids);
+        var ids = _.modules.bookmarks.getIds();
         var all = {};
-        for (id in ids) {
-            obj = _.bookmarks.get(id);
-            console.log(obj);
-            all[id] = obj;
+        var num_ids = ids.length;
+        for (i = 0; i < num_ids; i++) {
+            obj = _.modules.bookmarks.get(ids[i]);
+            all[ids[i]] = obj;
         }
         return all;
     }
 
     pub.getById = function(id) {
-        return _.bookmarks.get();
+        return _.modules.bookmarks.get();
     }
 
     pub.deleteAll = function() {
         console.log('- DB: deleteAll()');
-        var ids = _.bookmarks.getIds();
+        var ids = _.modules.bookmarks.getIds();
         console.log(ids);
         var all = {};
         for (id in ids) {
-            _.bookmarks.remove(id);
+            _.modules.bookmarks.remove(id);
         }
         return all;
     }
 
-
     return pub;
 }();
+
+
+/** 
+ * publicVideoSiteAPI - provides an abstraction interface to the various video site APIs
+ *
+ * requires: jquery, and jsuri 
+ */
+net.silverbucket.vidmarks.publicVideoSiteAPI = function() {
+    var pub = {};
+    var _ = {};
+
+    _.youtube = {};
+    _.site_mapping = {};
+    _.site_mapping['youtube'] = [
+            "youtube.com",
+            "www.youtube.com",
+            "youtu.be",
+            "www.youtu.be"
+        ];
+
+    pub.retreiveDetails = function(url, successFunc, failFunc) {
+        if (!url) {
+            console.debug('ERROR '+this+': url param required.');
+            return false;
+        }
+
+        var uri = new Uri(url);
+        console.log('DEBUG: host:'+uri.host()+' path:'+uri.path()+' query:'+uri.query()+' v:'+uri.getQueryParamValue('v'));
+        var match = false;
+        for (site in _.site_mapping) {
+            if (_.findStringInArray(uri.host(), _.site_mapping[site])) {
+                _[site].retreiveDetails(uri.getQueryParamValue('v'), successFunc, failFunc);
+                match = true;
+                break;
+            }
+        }
+
+        if (!match) {
+            console.debug('ERROR '+this+': unsupported url ['+url+']');
+        }
+    }
+
+    _.youtube.retreiveDetails = function(vid_id, successFunc) {
+        $.ajax({
+                url: "http://gdata.youtube.com/feeds/api/videos/"+vid_id+"?v=2&alt=json",
+                dataType: "jsonp",
+                success: function (data) { 
+                            console.log('GET successful');
+                            console.log(data);
+                            var details = {};
+                            details['title'] = data.entry.title.$t;
+                            details['description'] = data.entry.media$group.media$description.$t;
+                            details['embed_url'] = data.entry.content.src;
+                            details['thumbnail'] = data.entry.media$group.media$thumbnail[0].url;
+                            details['duration'] = data.entry.media$group.yt$duration.seconds;
+                            details['vid_id'] = vid_id;
+                            details['visit_url'] = 'http://youtube.com/watch?v='+vid_id;
+                            details['source'] = 'youtube';
+                            successFunc(details); 
+                        },
+                error: function (jqXHR, textStatus, errorThrown) {
+                            console.log('GET failed ['+textStatus+']: '+errorThrown);
+                            failFunc();
+                        }
+            });
+    }
+
+    _.findStringInArray = function(string, stringArray) {
+        var num_entries = stringArray.length;
+        for (var j=0; j< num_entries; j++) {
+            //console.log('findStringInArray: '+string+' == '+stringArray[j]);
+            if (stringArray[j].match (string)) return true;
+        }
+        return false;
+    }
+    return pub;
+}();
+
+
+net.silverbucket.vidmarks.UI = function() {
+    var pub = {};
+    var _ = {};
+
+    pub.newVidmark = function(details) {
+        console.log('newVidmark called with details...');
+        console.log(details);
+        $("#list_area").append('<article id="">'
+                    '<tr><td>'+details['title']+'</td></tr>'+
+                    '<tr><td>'+details['url']+'</td></tr>'+
+                    '<tr><td>'+details['description']+'</td></tr>';
+    }
+
+    pub.errorVidmark = function() {
+        console.log('errorVidmark called!');
+    }
+    return pub;
+}();
+
 
 
 $(document).ready(function() {
@@ -117,7 +212,13 @@ $(document).ready(function() {
 
     var DB = net.silverbucket.vidmarks.DBModel;
     DB.init();
+    var UI = net.silverbucket.vidmarks.UI;
+    var vidAPI = net.silverbucket.vidmarks.publicVideoSiteAPI;
 
+
+    /*
+     * navigation
+     */
     $("a#link-submit").click(function() {
         navMenu.toggle('submit');
         return false;
@@ -126,17 +227,29 @@ $(document).ready(function() {
     $("a#link-list").click(function() {
         navMenu.toggle('list');
 
-        var vidmark_list = DB.getAll();
+        var list = DB.getAll();
 
-        for (e in vidmark_list) {
-            $('#list_area tbody').append(
-                    '<tr><td>'+e['title']+'</td></tr><tr><td>'+e['url']+
-                    '</td></tr><tr colspan="2"><td>'+e['description']+
-                    '</td></tr>'
-                );
+        var new_table_rows = '[]';
+        for (e in list) {
+            console.log(e);
         }
+        $('#list_area tbody').html(new_table_rows);
 
         return false;
+    });
+    /* */
+
+
+    /* 
+     * form controls 
+     */
+    $("input#input_vid_url").bind('paste', function(event) {
+        var _this = this;
+        // Short pause to wait for paste to complete
+        setTimeout( function() {
+            var url = $(_this).val();
+            vidAPI.retreiveDetails(url, UI.newVidmark, UI.errorVidmark);
+        }, 100);
     });
 
     $("form#submit_url_form").validate({
@@ -155,9 +268,10 @@ $(document).ready(function() {
             console.log('form submittion passed validation');
             url = $('#input_vid_url').val();
             DB.addBookmark(url);
-
+            $('#input_vid_url').val('');
             return false;
         }
     });
-    
+    /* */
+        
 });
