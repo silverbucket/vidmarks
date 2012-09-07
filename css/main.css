@@ -106,11 +106,11 @@ div#content_area {
     margin: 0px;
     padding: 0px;
     background-color: white;
-    min-height: 500px;
-    height: 500px;
-    overflow: auto;
+    min-height: 710px;
+    height: 710px;
+    /*overflow: auto;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: auto;*/
 }
 
 div#logo {
@@ -121,16 +121,17 @@ div#logo {
 
 
 section#submit {
-    margin: 10px auto auto auto;
+    margin: 5px auto 0px auto;
     display: block;
+
 }
 section#vidmarks {
     display: block;
-    height: 300px;
-    min-height: 300px;
-    border: 1px solid blue;
+    height: 530px;
+    min-height: 530px;
+    /*border: 1px solid blue;*/
+    padding: 0px;
 }
-
 
 div#submit_url_form_area {
     display: inline-block;
@@ -191,6 +192,73 @@ span.note {
 }
 
 
+
+article.vidmark {
+    margin: 0px 10% 0px 10%;
+    padding: 15px;
+    display: inline-block;
+    min-width: 1100px;
+    height: 490px;
+    min-height: 490px;
+    border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    -o-border-radius: 12px;
+    -icab-border-radius: 12px;
+    -khtml-border-radius: 12px;
+}
+article.new_vidmark {
+    background-color: #EEEEFF;
+}
+article h1 {
+    font-size: 15pt;
+}
+article h3 {
+    font-size: 10pt;
+    margin: 15px auto auto auto;
+    padding: 0px;
+    text-align: left;
+}
+article div.video_embed {
+    margin: 5% auto 5% 10px;
+    width: 640;
+    height: 490;
+    display: inline-block;
+}
+
+article.new_vidmark div.video_embed {
+    margin: 20px auto auto 10px;
+}
+article.saved {
+    background-color: #EEFFEE !important;
+}
+article div.video_details {
+    margin: auto;
+    float: left;
+    min-width: 400px;
+    width: 400px;
+    display: inline-block;
+}
+article div.description {
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+article p.description {
+    text-align: left;
+    margin: 0px;
+    padding: 0px;
+}
+
+article p.status {
+    color: black;
+}
+
+article p.succes {
+    color: green;
+}
+
+
 footer a, .button {
     font-size: 1.3em;
     padding: 8px 12px 12px 12px;
@@ -203,6 +271,11 @@ footer a, .button {
     -khtml-border-radius: 8px;
     text-decoration: none;
     color: rgba(20, 20, 255, 1);
+    cursor: pointer;
+}
+
+a.stretch {
+    width: 100%;
 }
 
 footer a:hover, .button:hover {

@@ -1,4 +1,4 @@
-remoteStorage.defineModule('bookmarks', function(myPrivateBaseClient, myPublicBaseClient) {
+remoteStorage.defineModule('videos', function(myPrivateBaseClient, myPublicBaseClient) {
   var errorHandlers=[];
   function fire(eventType, eventObj) {
     if(eventType == 'error') {
@@ -32,15 +32,11 @@ remoteStorage.defineModule('bookmarks', function(myPrivateBaseClient, myPublicBa
     function set(id, title) {
       var obj = myPrivateBaseClient.getObject(listName+'/'+id);
       obj.title = title;
-      myPrivateBaseClient.storeObject('bookmark', listName+'/'+id, obj);
+      myPrivateBaseClient.storeObject('video', listName+'/'+id, obj);
     }
-    function add(url, title, description) {
+    function add(details) {
       var id = getUuid();
-      var status = myPrivateBaseClient.storeObject('bookmark', listName+'/'+id, {
-        title: title,
-        url: url,
-        description: description
-      });
+      var status = myPrivateBaseClient.storeObject('video', listName+'/'+id, details);
       return id;
     }
     function markCompleted(id, completedVal) {
@@ -50,7 +46,7 @@ remoteStorage.defineModule('bookmarks', function(myPrivateBaseClient, myPublicBa
       var obj = myPrivateBaseClient.getObject(listName+'/'+id);
       if(obj && obj.completed != completedVal) {
         obj.completed = completedVal;
-        myPrivateBaseClient.storeObject('bookmark', listName+'/'+id, obj);
+        myPrivateBaseClient.storeObject('video', listName+'/'+id, obj);
       }
     }
     function isCompleted(id) {
@@ -92,18 +88,22 @@ remoteStorage.defineModule('bookmarks', function(myPrivateBaseClient, myPublicBa
     };
   }
   return {
-    name: 'bookmarks',
+    name: 'videos',
     dataHints: {
-      "module": "bookmarks are web URLs",
+      "module": "videos are web URLs",
       
-      "objectType bookmark": "a reference to a place you'd like to return to at some point.",
-      "string boomark#title": "the title of the place the bookmark points to",
-      "string bookmark#url": "location bookmark points to",
-      "text bookmark#description": "description of the bookmark",
+      "objectType video": "a reference to a place you'd like to return to at some point.",
+      "string video#title": "the title of the place the video points to",
+      "string video#embed_url": "location video points to for embedding purposes",
+      "string video#visit_url": "location video points to for browsing to",
+      "text video#description": "description of the video",
+      "string video#thumbnail": "thumbnail image of the video",
+      "int video#duration": "duration of the video in seconds",
+      "string video#source": "source of video (ie. youtube, vimeo, local)",
       
-      "directory bookmarks/vidmarks/": "default private vidmarks list",
-      "directory bookmarks/:year/": "bookmarks created during year :year",
-      "directory public/bookmarks/:hash/": "bookmark list shared to for instance a team"
+      "directory videos/": "default private list",
+      "directory videos/:year/": "videos created during year :year",
+      "directory public/videos/:hash/": "video list shared to for instance a team"
     },
     exports: {
       getPrivateList: getPrivateList
