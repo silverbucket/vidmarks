@@ -96,7 +96,8 @@ textarea {
 
 body {
     text-align: center;
-    background-color: rgba(20, 99, 206, 0.1);
+    /*background-color: rgba(20, 99, 206, 0.1);*/
+    background-color: white;
 }
 
 div#content_area {
@@ -107,7 +108,8 @@ div#content_area {
     padding: 0px;
     background-color: white;
     min-height: 710px;
-    height: 710px;
+    display: block;
+    /*height: 710px;*/
     /*overflow: auto;
     overflow-x: hidden;
     overflow-y: auto;*/
@@ -124,6 +126,28 @@ section#submit {
     margin: 5px auto 0px auto;
     display: block;
 
+}
+div#message p {
+    margin: auto 25% auto 25%;
+    border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    -o-border-radius: 12px;
+    -icab-border-radius: 12px;
+    -khtml-border-radius: 12px;
+}
+div#message p.success {
+    background-color: #DDFFDD;
+}
+div#message p.error {
+    background-color: #FFDDDD;
+}
+div#message p.info {
+    background-color: #DDDDFF;
+}
+
+div#content_header {
+    height: 200px;
 }
 section#vidmarks {
     display: block;

@@ -34,8 +34,10 @@ remoteStorage.defineModule('videos', function(myPrivateBaseClient, myPublicBaseC
       obj.title = title;
       myPrivateBaseClient.storeObject('video', listName+'/'+id, obj);
     }
-    function add(details) {
-      var id = getUuid();
+    function add(details, id) {
+      if (!id) {
+        var id = getUuid();
+      }
       var status = myPrivateBaseClient.storeObject('video', listName+'/'+id, details);
       return id;
     }

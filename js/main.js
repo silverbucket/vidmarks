@@ -48,6 +48,7 @@ net.silverbucket.vidmarks.publicVideoSiteAPI = function() {
             "youtu.be",
             "www.youtu.be"
         ];
+    _.error_message = '';
 
     pub.retrieveDetails = function(url, successFunc, failFunc) {
         if (!url) {
@@ -68,7 +69,15 @@ net.silverbucket.vidmarks.publicVideoSiteAPI = function() {
 
         if (!match) {
             console.debug('ERROR '+this+': unsupported url ['+url+']');
+            _.error_message = 'unsupported or invalid url';
+            return false;
         }
+    }
+
+    pub.getErrorMessage = function() {
+        var msg =  _.error_message;
+        _.error_message = '';
+        return msg;
     }
 
     _.youtube.retrieveDetails = function(vid_id, successFunc) {
@@ -76,13 +85,13 @@ net.silverbucket.vidmarks.publicVideoSiteAPI = function() {
                 url: "http://gdata.youtube.com/feeds/api/videos/"+vid_id+"?v=2&alt=json",
                 dataType: "jsonp",
                 success: function (data) { 
-                        console.log('GET successful');
+                        console.log('vidAPI.retrieveDetails() - GET successful');
                         console.log(data);
                         var details = {};
                         details['title'] = data.entry.title.$t;
                         details['description'] = data.entry.media$group.media$description.$t;
                         details['embed_url'] = data.entry.content.src;
-                        details['thumbnail'] = data.entry.media$group.media$thumbnail[0].url;
+                        details['thumbnail'] = data.entry.media$group.media$thumbnail[2].url;
                         details['duration'] = data.entry.media$group.yt$duration.seconds;
                         details['vid_id'] = vid_id;
                         details['visit_url'] = 'http://youtube.com/watch?v='+vid_id;
@@ -125,21 +134,33 @@ net.silverbucket.vidmarks.dbModel = function() {
 
     pub.init = function() {
         console.log('- DB: init()');
-        remoteStorage.claimAccess('bookmarks', 'rw');
+        //remoteStorage.claimAccess('bookmarks', 'rw');
         remoteStorage.claimAccess('videos', 'rw');
+        remoteStorage.claimAccess('tags', 'rw');
         remoteStorage.displayWidget('remotestorage-connect'); //after that (not before that) display widget
 
         console.log('- DB: getting priviteLists...');
-        _.modules.bookmarks = remoteStorage.bookmarks.getPrivateList(_.app_namespace);
-        _.modules.videos    = remoteStorage.videos.getPrivateList('vidmarks');
+        //_.modules.bookmarks = remoteStorage.bookmarks.getPrivateList(_.app_namespace);
+        _.modules.videos    = remoteStorage.videos.getPrivateList(_.app_namespace);
+        _.modules.tags      = remoteStorage.tags.getPrivateList(_.app_namespace);
 
         _.modules.videos.on('error', function(err) {
-            console.log('DB ERROR: '+err);
+            console.log('DB ERROR: videos - '+err);
         });
 
         // XXX - this function returns only obj, not id [original params were (id, obj)]
         _.modules.videos.on('change', function(obj) {
-            console.log('DB CHANGE: bookmarks on(change) fired.');
+            console.log('DB CHANGE: videos on(change) fired.');
+            console.log(obj);
+        });
+
+        _.modules.tags.on('error', function(err) {
+            console.log('DB ERROR: tags - '+err);
+        });
+
+        // XXX - this function returns only obj, not id [original params were (id, obj)]
+        _.modules.tags.on('change', function(obj) {
+            console.log('DB CHANGE: tags on(change) fired.');
             console.log(obj);
         });
     }
@@ -164,7 +185,7 @@ net.silverbucket.vidmarks.dbModel = function() {
         cache_id = details['source']+'_'+details['vid_id'];
         if (vidmark_id === cache_id) {
             console.log('ID match! we can save');
-            _.modules.videos.add(details);
+            _.modules.videos.add(details, details['source']+'_'+details['vid_id']);
         } else {
             console.log('IDs do not match ['+vidmark_id+' = '+cache_id+']');
         }
@@ -193,8 +214,9 @@ net.silverbucket.vidmarks.dbModel = function() {
         var ids = _.modules.videos.getIds();
         console.log(ids);
         var all = {};
-        for (id in ids) {
-            _.modules.videos.remove(id);
+        var num_ids = ids.length;
+        for (i = 0; i < num_ids; i++) {
+            _.modules.videos.remove(ids[i]);
         }
         return all;
     }
@@ -247,7 +269,9 @@ net.silverbucket.vidmarks.appLogic = function() {
             // Short pause to wait for paste to complete
             setTimeout( function() {
                 var url = $(_this).val();
-                _.vidAPI.retrieveDetails(url, pub.displayNewVidmark, pub.displayErrorVidmark);
+                if (!_.vidAPI.retrieveDetails(url, pub.displayNewVidmark, pub.displayErrorVidmark)) {
+                    pub.displayMessage(_.vidAPI.getErrorMessage(), 'error');
+                }
             }, 100);
         });
 
@@ -278,29 +302,39 @@ net.silverbucket.vidmarks.appLogic = function() {
     /*******************************/
 
 
-    _.vidmark_enrtries = {};
+    _.vidmarks = {};
     _.templates = {};
 
 
-    // title, visit_url, visit_url (readable), description, embed_url
+    // title, visit_url, visit_url (readable), description, thumbnail
     _.templates.display_vidmark = '<div class="video_details"><h1>{0}</h1>'+
                 '<a target="_blank" href="{2}">{3}</a>'+
                 '<div class="description"><h3>description</h3><p class="description">{4}</p></div></div>'+
-                '<div class="video_embed"><iframe id="ytplayer" type="text/html" width="640" height="390" '+
-                'src="{5}?autoplay=0&origin=http://example.com" '+
-                'frameborder="0"/></div>';
+                '<div class="video_embed"><img src="{5}" alt="thumbnail"/></div>';
+                //'<div class="video_embed"><iframe id="ytplayer" type="text/html" width="640" height="390" '+
+                //'src="{5}?autoplay=0&origin=http://example.com" '+
+                //'frameborder="0"/></div>';
 
     // present new vidmark data for submition
     pub.displayNewVidmark = function(details) {
         console.log('newVidmark called with details...');
+        
+        console.log('new vid_id:'+details['source']+'_'+details['vid_id']);
+        console.log(_.vidmarks);
+        if (_.vidmarks[details['source']+'_'+details['vid_id']]) {
+            pub.displayMessage('that video already exists!', 'info');
+            //pub.scrollToEntry(details['source']+'_'+details['vid_id']);
+            return false;
+        }
+
         // /console.log(details);
         _.db.setCache(details); // cache the details in case of save
 
-        $("#vidmarks").append('<article id="'+details['source']+'_'+details['vid_id']+'" class="new_vidmark vidmark">'+
+        $("#vidmarks").prepend('<article id="'+details['source']+'_'+details['vid_id']+'" class="new_vidmark vidmark">'+
                     '<div id="save_status"><a href="#add" class="button stretch" id="add-vidmark">add video</a></div>'+
                     _.string_inject(_.templates.display_vidmark, 
                             [details['title'], details['visit_url'], details['visit_url'], 
-                            details['description'], details['embed_url']])+
+                            details['description'], details['thumbnail']])+
                     '</article>'
                 );
 
@@ -323,30 +357,43 @@ net.silverbucket.vidmarks.appLogic = function() {
     }
 
     pub.displayVidmarkList = function() {
-        console.log('displayVidmarkList');
+        console.log('displayVidmarkList()');
         var list = _.db.getAll();
         console.log(list);
         $("#vidmarks").html('');
 
-        _.vidmark_entries = {};
-        var last_key;
+        _.vidmarks = list;
         for (e in list) {
-            _.vidmark_entries[list[e]['source']+'_'+list[e]['vid_id']] = 
-                    '<article id="'+list[e]['source']+'_'+list[e]['vid_id']+'" class="vidmark">'+
+            console.log('processing ['+e+']');
+            $("#vidmarks").append( 
+                    '<article id="'+e+'" class="vidmark">'+
                     _.string_inject(_.templates.display_vidmark, 
                             [list[e]['title'], list[e]['visit_url'], list[e]['visit_url'], 
-                            list[e]['description'], list[e]['embed_url']])+
-                    '</article>';
-            last_key = list[e]['source']+'_'+list[e]['vid_id']
+                            list[e]['description'], list[e]['thumbnail']])+
+                    '</article>');
+            //$("#vidmarks").append(_.vidmark_entries[list[e]]);
+            console.log('END ['+e+']');
+            //break;
         }
-        $("#vidmarks").append(_.vidmark_entries[last_key]);
+        
         //$('#list_area tbody').html(new_table_rows);
     }
 
     pub.displayErrorVidmark = function() {
         console.log('errorVidmark called!');
     }
+
+    pub.scrolToEntry = function(id) {
+        $('#vidmarks').animate({scrollTop: $("#"+id).offset().top},'slow');
+    }
     
+    pub.displayMessage = function(message, type) {
+        console.log('displayMessage('+message+')');
+        if (!type) { type = 'info'; }
+        $('#message').html('<p class="'+type+'">'+message+'</p>');
+        $('#message p').delay(1000).fadeOut('slow');
+        //$('#message').html('<p>&nbsp;<br /></p>');
+    }
 
     /* 
      * stolen from:
