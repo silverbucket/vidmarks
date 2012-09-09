@@ -7,72 +7,116 @@ remoteStorage.defineModule('tags', function(myPrivateBaseClient, myPublicBaseCli
       }
     }
   }
-  function getUuid() {
-    var uuid = '',
-        i,
-        random;
-
-    for ( i = 0; i < 32; i++ ) {
-        random = Math.random() * 16 | 0;
-        if ( i === 8 || i === 12 || i === 16 || i === 20 ) {
-            uuid += '-';
-        }
-        uuid += ( i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random) ).toString( 16 );
-    }
-    return uuid;
-  }
   function getPrivateList(listName) {
     myPrivateBaseClient.sync(listName+'/');
-    function getIds() {
-      return myPrivateBaseClient.getListing(listName+'/');
+    
+
+    /**
+     * get list of existing tags
+     * @returns {array}
+     */
+    function getTags () {
+      return myPrivateBaseClient.getListing('/'); 
     }
-    function get(id) {
-      return myPrivateBaseClient.getObject(listName+'/'+id);
-    }
-    function set(id, title) {
-      var obj = myPrivateBaseClient.getObject(listName+'/'+id);
-      obj.title = title;
-      myPrivateBaseClient.storeObject('task', listName+'/'+id, obj);
-    }
-    function add(title) {
-      var id = getUuid();
-      myPrivateBaseClient.storeObject('task', listName+'/'+id, {
-        title: title,
-        completed: false
-      });
-      return id;
-    }
-    function markCompleted(id, completedVal) {
-      if(typeof(completedVal) == 'undefined') {
-        completedVal = true;
-      }
-      var obj = myPrivateBaseClient.getObject(listName+'/'+id);
-      if(obj && obj.completed != completedVal) {
-        obj.completed = completedVal;
-        myPrivateBaseClient.storeObject('task', listName+'/'+id, obj);
-      }
-    }
-    function isCompleted(id) {
-      var obj = get(id);
-      return obj && obj.completed;
-    }
-    function getStats() {
-      var ids = getIds();
-      var stat = {
-        todoCompleted: 0,
-        totalTodo: ids.length
-      };
-      for (var i=0; i<stat.totalTodo; i++) {
-        if (isCompleted(ids[i])) {
-          stat.todoCompleted += 1;
+    
+    /**
+     * get a list of all tags which have a specified record ID
+     * @param {string} record id
+     * @returns {array} array of tag names
+     */
+    function getTagsByRecord(recordId) {
+      tags = getTags();
+      tagNames = [];
+      // get add instances of recordId from recordIds list
+      num_tags = tags.length;
+      for (i = 0; i < num_tags; i++) {
+        recordIds = getTagged(tags[i]);
+        num_records = recordIds.length;
+        for (j = 0; j < num_records; j++) {
+          if (recordId === recordIds[j]) {
+            tagNames.append(tags[i]);
+          }
         }
       }
-      stat.todoLeft = stat.totalTodo - stat.todoCompleted;
-      return stat;
+      return tagNames;
     }
-    function remove(id) {
-      myPrivateBaseClient.remove(listName+'/'+id);
+
+    /**
+     * get list of record IDs for this app which have the tag specified.
+     * @param {string} the name of the tag
+     * @returns {array}
+     */
+    function getTagged(tagName) {
+      return myPrivateBaseClient.getObject(tagName+'/'+listName);
     }
+    
+    /**
+     * add to a list of record IDs to a tag.
+     * @param {string} tag name
+     * @param {array} list of record IDs
+     */
+    function addTagged(tagName, recordIds) {
+      if (typeof recordIds === 'string') {
+        recordIds = [recordIds];
+      }
+      var obj = myPrivateBaseClient.getObject(tagName+'/'+listName);
+      recordIds.concat(obj);
+      myPrivateBaseClient.storeObject('tag', tagName+'/'+listName, recordIds);
+    }
+
+
+    /**
+     * sets a list of tags for an id
+     * @params {string} record ID
+     * @params {array} list og tag names
+     */
+    function addTagToRecord(appId, tagNames) {
+      num_tagNames = tagNames.length;
+      for (i = 0; i < num_tagNames; i++) {
+        addTagged(tagNames[i], appid);
+      }
+    }
+
+    
+    /**
+     * removes an ID from a specified tag
+     * @param {string} tag name
+     * @param {string} id(s) of record to remove from list
+     */
+    function removeTagged(tagName, recordIds) {
+      if (typeof recordIds === 'string') {
+        recordIds = [recordIds];
+      }
+      var obj = myPrivateBaseClient.getObject(tagName+'/'+listName);
+
+      // remove all occurences of appId(s) from obj list
+      num_ids = recordIds.length;
+      for (i = 0; i < num_ids; i++) {
+        num_objs = obj.length;
+        for (j = 0; j < num_objs; j++) {
+          if (recordIds[i] === obj[j]) {
+            obj.splice(j, 1);
+            break;
+          }
+        }
+      }
+      myPrivateBaseClient.storeObject('tag', tagName+'/'+listName, obj);
+    }
+
+    
+    /**
+     * remove the specified record ID from all tags
+     * @params {string} record ID
+     */
+    function removeRecord(appId) {
+      tags = getTags();
+      num_tags = tags.length;
+      for (i = 0; i < num_tags; i++) {
+        removeTagged(tags[i], appId);
+      }
+    }
+
+
     function on(eventType, cb) {
       myPrivateBaseClient.on(eventType, cb);
       if(eventType == 'error') {
@@ -80,28 +124,27 @@ remoteStorage.defineModule('tags', function(myPrivateBaseClient, myPublicBaseCli
       }
     }
     return {
-      getIds        : getIds,
-      get           : get,
-      set           : set,
-      add           : add,
-      remove        : remove,
-      markCompleted : markCompleted,
-      getStats      : getStats,
+      getTags         : getTags,
+      getTagsByRecord : getTagsByRecord,
+      getTagged       : getTagged,
+      addTagged       : addTagged,
+      addTagToRecord : addTagToRecord,
+      removeTagged    : removeTagged,
       on            : on
     };
   }
   return {
     name: 'tags',
     dataHints: {
-      "module": "bookmarks are web URLs",
+      "module": "tags are means of grouping sets of related information",
       
-      "objectType task": "something that needs doing, like cleaning the windows or fixing a specific bug in a program",
-      "string task#title": "describes what it is that needs doing",
-      "boolean task#completed": "whether the task has already been completed or not (yet)",
+      "objectType tag": "something that needs doing, like cleaning the windows or fixing a specific bug in a program",
+      "string tag#id": "tag name",
+      "boolean tag#application": "the name of the application which contains an array of ids",
       
-      "directory tasks/todos/": "default private todo list",
-      "directory tasks/:year/": "tasks that need doing during year :year",
-      "directory public/tasks/:hash/": "tasks list shared to for instance a team"
+      "directory tags/todos/": "default private todo list",
+      "directory tags/:year/": "tags that need doing during year :year",
+      "directory public/tags/:hash/": "tags list shared to for instance a team"
     },
     exports: {
       getPrivateList: getPrivateList

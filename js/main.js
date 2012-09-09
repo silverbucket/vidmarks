@@ -144,6 +144,8 @@ net.silverbucket.vidmarks.dbModel = function() {
         _.modules.videos    = remoteStorage.videos.getPrivateList(_.app_namespace);
         _.modules.tags      = remoteStorage.tags.getPrivateList(_.app_namespace);
 
+
+        // testing events, changing, behavior
         _.modules.videos.on('error', function(err) {
             console.log('DB ERROR: videos - '+err);
         });
@@ -174,7 +176,12 @@ net.silverbucket.vidmarks.dbModel = function() {
     pub.getCache = function() {
         return _.cache;
     }
-
+    pub.getTags = function() {
+        return _.modules.tags.getTags();
+    }
+    pub.getTagsByRecord = function(recordId) {
+        return _.modules.tags.getTagsByRecord(recordId);
+    }
     pub.addVidmark = function(vidmark_id) {
         if (!_.cache) {
             console.log('CACHE not set, cannot save');
@@ -310,7 +317,9 @@ net.silverbucket.vidmarks.appLogic = function() {
     _.templates.display_vidmark = '<div class="video_details"><h1>{0}</h1>'+
                 '<a target="_blank" href="{2}">{3}</a>'+
                 '<div class="description"><h3>description</h3><p class="description">{4}</p></div></div>'+
-                '<div class="video_embed"><img src="{5}" alt="thumbnail"/></div>';
+                '<div class="video_embed"><img src="{5}" alt="thumbnail"/></div>'+
+                '<input class="tag_list" type="text" size="50" name="tags" value="{6}"/>';
+                //'<div class="tags">{6}</div>';
                 //'<div class="video_embed"><iframe id="ytplayer" type="text/html" width="640" height="390" '+
                 //'src="{5}?autoplay=0&origin=http://example.com" '+
                 //'frameborder="0"/></div>';
@@ -319,9 +328,10 @@ net.silverbucket.vidmarks.appLogic = function() {
     pub.displayNewVidmark = function(details) {
         console.log('newVidmark called with details...');
         
-        console.log('new vid_id:'+details['source']+'_'+details['vid_id']);
-        console.log(_.vidmarks);
-        if (_.vidmarks[details['source']+'_'+details['vid_id']]) {
+        record_id = details['source']+'_'+details['vid_id'];
+        console.log('new vid_id:'+record_id, _.vidmarks);
+        
+        if (_.vidmarks[record_id]) {
             pub.displayMessage('that video already exists!', 'info');
             //pub.scrollToEntry(details['source']+'_'+details['vid_id']);
             return false;
@@ -330,11 +340,17 @@ net.silverbucket.vidmarks.appLogic = function() {
         // /console.log(details);
         _.db.setCache(details); // cache the details in case of save
 
-        $("#vidmarks").prepend('<article id="'+details['source']+'_'+details['vid_id']+'" class="new_vidmark vidmark">'+
+        //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxx
+        //tag_display = '<input class="tag_list" type="text" size="50" name="tags" value="{6}"/>';
+        //tag_display = '<p>{6}</p>';
+        
+        tags = _.db.getTagsByRecord(record_id);
+
+        $("#vidmarks").prepend('<article id="'+record_id+'" class="new_vidmark vidmark">'+
                     '<div id="save_status"><a href="#add" class="button stretch" id="add-vidmark">add video</a></div>'+
                     _.string_inject(_.templates.display_vidmark, 
                             [details['title'], details['visit_url'], details['visit_url'], 
-                            details['description'], details['thumbnail']])+
+                            details['description'], details['thumbnail'], tags])+
                     '</article>'
                 );
 
@@ -354,6 +370,17 @@ net.silverbucket.vidmarks.appLogic = function() {
 
             return false;
         });
+
+        // submit tags when enter is pressed
+        $("article#"+record_id+' input.tag_list').keypress(function (e) {
+          if (e.which == 13) {
+            // XXX save tags
+            console.log('ENTER was pressed tag field');
+            e.preventDefault();
+            return false;
+          }
+        });
+
     }
 
     pub.displayVidmarkList = function() {
@@ -365,15 +392,25 @@ net.silverbucket.vidmarks.appLogic = function() {
         _.vidmarks = list;
         for (e in list) {
             console.log('processing ['+e+']');
+            tags = _.db.getTagsByRecord(e);
             $("#vidmarks").append( 
                     '<article id="'+e+'" class="vidmark">'+
                     _.string_inject(_.templates.display_vidmark, 
                             [list[e]['title'], list[e]['visit_url'], list[e]['visit_url'], 
-                            list[e]['description'], list[e]['thumbnail']])+
+                            list[e]['description'], list[e]['thumbnail'], tags])+
                     '</article>');
             //$("#vidmarks").append(_.vidmark_entries[list[e]]);
             console.log('END ['+e+']');
-            //break;
+
+            // submit tags when enter is pressed
+            $("article#"+e+' input.tag_list').keypress(function (e) {
+              if (e.which == 13) {
+                // XXX save tags
+                console.log('ENTER was pressed tag field');
+                e.preventDefault();
+                return false;
+              }
+            });
         }
         
         //$('#list_area tbody').html(new_table_rows);
@@ -396,7 +433,7 @@ net.silverbucket.vidmarks.appLogic = function() {
     }
 
     /* 
-     * stolen from:
+     * basic templating function, stolen from:
      * http://mattsnider.com/template-string-replacement-function/
      */
     _.string_inject = function(sSource, aValues) {
