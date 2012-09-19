@@ -131,6 +131,7 @@ net.silverbucket.vidmarks.dbModel = function() {
 
     _.modules = {}; // module objects for RS
     _.app_namespace = 'vidmarks';
+    _.doc_type = 'videos';
     _.cache = {};
 
     pub.init = function() {
@@ -143,8 +144,8 @@ net.silverbucket.vidmarks.dbModel = function() {
         console.log('- DB: getting priviteLists...');
         //_.modules.bookmarks = remoteStorage.bookmarks.getPrivateList(_.app_namespace);
         _.modules.videos    = remoteStorage.videos.getPrivateList(_.app_namespace);
-        _.modules.tags      = remoteStorage.tags.getPrivateList(_.app_namespace);
-
+        _.modules.tags      = remoteStorage.tags;
+        _.modules.tags.docType = 'videos';
 
         // testing events, changing, behavior
         _.modules.videos.on('error', function(err) {
@@ -180,6 +181,7 @@ net.silverbucket.vidmarks.dbModel = function() {
         }
         return results;
     }
+    
     pub.getTags = function() {
         return _.modules.tags.getTags();
     }
@@ -330,7 +332,7 @@ net.silverbucket.vidmarks.appLogic = function() {
                 '<a target="_blank" href="{2}">{3}</a>'+
                 '<div class="description"><h3>description</h3><p class="description">{4}</p></div></div>'+
                 '<div class="video_embed"><img src="{5}" alt="thumbnail"/></div>'+
-                '<div><label name="tag_label" class="tag_label">tags</label>'+
+                '<div class="tags"><label name="tag_label" class="tag_label">tags</label>'+
                 '<input class="tag_list" type="text" size="50" name="tags" value="{6}"/>'+
                 '<div class="tags_status"></div></div>';
                 //'<div class="tags">{6}</div>';
@@ -406,11 +408,12 @@ net.silverbucket.vidmarks.appLogic = function() {
         for (id in list) {
             console.log('processing ['+id+']');
             tags = _.db.getTagsByRecord(id);
+            tags_formatted = _.formatTagList(tags);
             $("#vidmarks").append( 
                     '<article id="'+id+'" class="vidmark">'+
                     _.string_inject(_.templates.display_vidmark, 
                             [list[id]['title'], list[id]['visit_url'], list[id]['visit_url'], 
-                            list[id]['description'], list[id]['thumbnail'], tags])+
+                            list[id]['description'], list[id]['thumbnail'], tags_formatted])+
                     '</article>');
             //$("#vidmarks").append(_.vidmark_entries[list[e]]);
             console.log('END ['+id+']');
@@ -454,6 +457,9 @@ net.silverbucket.vidmarks.appLogic = function() {
         tag_list = $('article#'+id+' input.tag_list').val().split(/\,\s*/);
         console.log(tag_list);
         return tag_list;
+    }
+    _.formatTagList = function(tags) {
+        return tags.join(', ');
     }
 
 

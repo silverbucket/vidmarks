@@ -149,12 +149,31 @@ div#message p.info {
 div#content_header {
     height: 200px;
 }
+
+
+aside {
+    float: left;
+    position: fixed;
+    text-align: center;
+    top: 5%;
+    left: 0%;
+    width: 100px;
+}
+aside h2 {
+    margin-left: 35px;
+}
+ul#full_tag_list {
+    list-style: none; 
+    margin-top: 0px;
+}
+
 section#vidmarks {
     display: block;
-    height: 530px;
+    /*height: 530px;*/
     min-height: 530px;
     /*border: 1px solid blue;*/
     padding: 0px;
+    margin-bottom: 150px;
 }
 
 div#submit_url_form_area {
@@ -197,18 +216,19 @@ form input.valid {
 }
 
 article.vidmark {
-    margin: 0px 10% 0px 10%;
+    margin: 0px 10% 40px 10%;
     padding: 15px;
     display: inline-block;
     min-width: 1000px;
-    height: 490px;
-    min-height: 490px;
+    /*height: 520px;*/
+    min-height: 520px;
     border-radius: 12px;
     -webkit-border-radius: 12px;
     -moz-border-radius: 12px;
     -o-border-radius: 12px;
     -icab-border-radius: 12px;
     -khtml-border-radius: 12px;
+    border-top: 1px solid black;
 }
 article.new_vidmark {
     background-color: #EEEEFF;
@@ -235,6 +255,12 @@ div.label_container {
 div.counter_label_container {
     display: inline-block;
     width: 140px;
+}
+
+div.tags {
+    margin-top: 5px;
+    display: block;
+    text-align: center;
 }
 
 span.note {
@@ -290,6 +316,13 @@ article p.succes {
     color: green;
 }
 
+
+footer {
+    width: 100%;
+    background-color: #F7FBFF;
+    height: 300px;
+    display: inline-block;
+}
 
 footer a, .button {
     font-size: 1.3em;
