@@ -29,6 +29,23 @@ net.silverbucket.vidmarks.navMenu = function() {
 }();
 
 
+/** 
+ * utilityFunctions - a collection of helper functions 
+ */
+net.silverbucket.vidmarks.utilityFunctions = function() {
+    Array.prototype.unique = function() {
+        var a = this.concat();
+        for(var i=0; i<a.length; ++i) {
+            for(var j=i+1; j<a.length; ++j) {
+                if(a[i] === a[j])
+                    a.splice(j, 1);
+            }
+        }
+
+        return a;
+    };
+}();
+
 
 
 /** 
@@ -185,6 +202,16 @@ net.silverbucket.vidmarks.dbModel = function() {
     pub.getTags = function() {
         return _.modules.tags.getTags();
     }
+    pub.getTagCounts = function() {
+        tags = pub.getTags();
+        num_tags = tags.length;
+        r_struct = {};
+        for (i = 0; i < num_tags; i++) {
+            tag_recs = _.modules.tags.getTagged(tags[i]);
+            r_struct[tags[i]] = tag_recs.length;
+        }
+        return r_struct;
+    }
     pub.getTagsByRecord = function(recordId) {
         tags = _.modules.tags.getTagsByRecord(recordId);
         console.log('DB getTagsByRecord -- ', tags);
@@ -246,6 +273,8 @@ net.silverbucket.vidmarks.dbModel = function() {
 }();
 
 
+
+
 /**
  * appLogic - generic app related methods and logic
  *
@@ -256,6 +285,7 @@ net.silverbucket.vidmarks.appLogic = function() {
     var _ = {};
 
     pub.init = function() {
+        _.util = net.silverbucket.vidmarks.utilityFunctions;
         _.nav = net.silverbucket.vidmarks.navMenu;
         _.nav.init(['list']);//, 'submit']);
         _.nav.toggle('list');
@@ -316,6 +346,7 @@ net.silverbucket.vidmarks.appLogic = function() {
                 return false;
             }
         });
+
         // when you hit enter in the tag input field, we save the new tags
         // using the jquery 'delegate' function ('on')
         $("section#vidmarks").on('keypress', 'input.tag_list', function (e) {
@@ -326,12 +357,14 @@ net.silverbucket.vidmarks.appLogic = function() {
                 tag_list = _.getInputTags(id);
                 console.log(tag_list);
                 _.db.addTagsToRecord(id, tag_list, function(){_.updateTagStatus(id, 'tags updated!')});
+                pub.displayTagList(); // update tags list
                 e.preventDefault();
                 return false;
             }
         });
         /* */ 
 
+        pub.displayTagList();
         pub.displayVidmarkList();
     }
 
@@ -351,10 +384,7 @@ net.silverbucket.vidmarks.appLogic = function() {
                 '<div class="tags"><label name="tag_label" class="tag_label">tags</label>'+
                 '<input class="tag_list" type="text" size="50" name="tags" value="{6}"/>'+
                 '<div class="tags_status"></div></div>';
-                //'<div class="tags">{6}</div>';
-                //'<div class="video_embed"><iframe id="ytplayer" type="text/html" width="640" height="390" '+
-                //'src="{5}?autoplay=0&origin=http://example.com" '+
-                //'frameborder="0"/></div>';
+
 
 
     /*******************************/
@@ -421,7 +451,7 @@ net.silverbucket.vidmarks.appLogic = function() {
     pub.displayVidmarkList = function() {
         console.log('displayVidmarkList()');
         var list = _.db.getAll();
-        console.log(list);
+        //console.log(list);
         $("#vidmarks").html('');
 
         _.vidmarks = list;
@@ -437,8 +467,25 @@ net.silverbucket.vidmarks.appLogic = function() {
                     '</article>');
             //console.log('END ['+id+']');
         }
-        
-        //$('#list_area tbody').html(new_table_rows);
+    }
+
+
+    /*
+     * display tags and their counts in the aside bar
+     */
+    pub.displayTagList = function() {
+        console.log('displayTagList()');
+        var list = _.db.getTagCounts();
+        console.log('displayTagList()  - return value:');
+        console.log(list);
+        $("aside ul#full_tag_list").html('');
+
+        for (tag in list) {
+            //console.log('processing ['+tag+']');
+            //console.log('appending: <li id="'+tag+'">'+tag+' ('+list[tag]+')</li>');
+            $('aside ul#full_tag_list').append('<li>'+tag+'</li> ('+list[tag]+')<br />');
+            //console.log('END ['+id+']');
+        }
     }
 
 
@@ -492,6 +539,8 @@ net.silverbucket.vidmarks.appLogic = function() {
 
     return pub;
 }();
+
+
 
 
 

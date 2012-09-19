@@ -59,7 +59,6 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         tagNames = [];
         // get add instances of recordId from recordIds list
         num_tags = tags.length;
-        console.log('GTBR: tags:',tags);
         for (i = 0; i < num_tags; i++) {
           recordIds = this.getTagged(tags[i]);
           num_records = recordIds.length;
@@ -71,6 +70,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         }
         return tagNames;
       },
+
 
 
       /**
@@ -85,8 +85,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         if (val != undefined) {
           return_val = val;
         }
-
-        console.log(return_val);
+        //console.log(return_val);
         return return_val;
       },
 
@@ -103,9 +102,19 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         }
         
         var obj = privateClient.getObject(tagName+'/'+this.docType);
-        recordIds.concat(obj);
-        console.log('recordIds:',recordIds); 
-        privateClient.storeObject('tag', tagName+'/'+this.docType, recordIds);
+        new_obj = obj.concat(recordIds).sort();
+
+        // unique entries only
+        num_new_obj = new_obj.length;
+        unique_obj = [];
+        for(var i=0; i < num_new_obj; ++i) {
+          if(new_obj[i] !== new_obj[i+1]) {
+            unique_obj.push(new_obj[i]);
+          }
+        }
+
+        console.log('merged and unique result:', unique_obj);
+        privateClient.storeObject('tag', tagName+'/'+this.docType, unique_obj);
       },
 
 

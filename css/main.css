@@ -145,18 +145,25 @@ div#content_header {
 
 aside {
     float: left;
-    position: fixed;
-    text-align: center;
-    top: 5%;
-    left: 0%;
-    width: 100px;
+    position: absolute;
+    top: 200px;
+    left: 0;
+    width: 170px;
+    display: block;
 }
 aside h2 {
-    margin-left: 35px;
+    margin-left: 5px;
 }
 ul#full_tag_list {
     list-style: none; 
     margin-top: 0px;
+    display: inline-block;
+    text-align: left;
+    font-size: 0.9em;
+    line-height: 1.8em;
+}
+ul#full_tag_list li {
+    display: inline-block;
 }
 
 section#vidmarks {
@@ -164,7 +171,6 @@ section#vidmarks {
     /*height: 530px;*/
     min-height: 530px;
     /*border: 1px solid blue;*/
-    padding: 0px;
     margin-bottom: 150px;
 }
 
@@ -208,7 +214,7 @@ form input.valid {
 }
 
 article.vidmark {
-    margin: 0px 10% 40px 10%;
+    margin: 0px 10% 40px 200px;
     padding: 15px;
     display: inline-block;
     min-width: 990px;
@@ -220,7 +226,7 @@ article.vidmark {
     -o-border-radius: 12px;
     -icab-border-radius: 12px;
     -khtml-border-radius: 12px;
-    border-top: 1px solid black;
+    border-top: 1px solid #D0D0D0;
 }
 article.new_vidmark {
     background-color: #EEEEFF;
@@ -312,8 +318,9 @@ article p.succes {
 footer {
     width: 100%;
     background-color: #F7FBFF;
-    height: 300px;
+    height: 200px;
     display: inline-block;
+    margin-bottom: -10px;
 }
 
 footer a, .button {
