@@ -98,21 +98,13 @@ body {
     text-align: center;
     /*background-color: rgba(20, 99, 206, 0.1);*/
     background-color: white;
+    min-width: 1120px;
+    display: block;
 }
 
-div#content_area {
-    border-top: 1px solid black;
-    border-bottom: 1px solid #D1D1D1;
+div#content_header {
+    min-width: 1220px;
     display: block;
-    margin: 0px;
-    padding: 0px;
-    background-color: white;
-    min-height: 710px;
-    display: block;
-    /*height: 710px;*/
-    /*overflow: auto;
-    overflow-x: hidden;
-    overflow-y: auto;*/
 }
 
 div#logo {
@@ -219,7 +211,7 @@ article.vidmark {
     margin: 0px 10% 40px 10%;
     padding: 15px;
     display: inline-block;
-    min-width: 1000px;
+    min-width: 990px;
     /*height: 520px;*/
     min-height: 520px;
     border-radius: 12px;

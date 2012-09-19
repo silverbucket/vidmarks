@@ -316,10 +316,26 @@ net.silverbucket.vidmarks.appLogic = function() {
                 return false;
             }
         });
+        // when you hit enter in the tag input field, we save the new tags
+        // using the jquery 'delegate' function ('on')
+        $("section#vidmarks").on('keypress', 'input.tag_list', function (e) {
+            if (e.which == 13) {
+                console.log(e);
+                var id = $(this).parent().parent().attr('id')
+                console.log('ENTER was pressed tag field ['+id+']');
+                tag_list = _.getInputTags(id);
+                console.log(tag_list);
+                _.db.addTagsToRecord(id, tag_list, function(){_.updateTagStatus(id, 'tags updated!')});
+                e.preventDefault();
+                return false;
+            }
+        });
         /* */ 
 
         pub.displayVidmarkList();
     }
+
+
     /*******************************/
 
 
@@ -339,6 +355,10 @@ net.silverbucket.vidmarks.appLogic = function() {
                 //'<div class="video_embed"><iframe id="ytplayer" type="text/html" width="640" height="390" '+
                 //'src="{5}?autoplay=0&origin=http://example.com" '+
                 //'frameborder="0"/></div>';
+
+
+    /*******************************/
+
 
     /*
      * present new vidmark data for submition
@@ -392,8 +412,8 @@ net.silverbucket.vidmarks.appLogic = function() {
                 return false;
             }
         });
-
     }
+
 
     /*
      * display existing vidmark entries
@@ -415,24 +435,12 @@ net.silverbucket.vidmarks.appLogic = function() {
                             [list[id]['title'], list[id]['visit_url'], list[id]['visit_url'], 
                             list[id]['description'], list[id]['thumbnail'], tags_formatted])+
                     '</article>');
-            //$("#vidmarks").append(_.vidmark_entries[list[e]]);
-            console.log('END ['+id+']');
-
-            // when you hit enter in the tag input field, we save the new tags
-            $("article#"+id+' input.tag_list').keypress(function (e) {
-                if (e.which == 13) {
-                    console.log('ENTER was pressed tag field');
-                    tag_list = _.getInputTags(id);
-                    console.log(tag_list);
-                    _.db.addTagsToRecord(id, tag_list, function(){_.updateTagStatus(id, 'tags updated!')});
-                    e.preventDefault();
-                    return false;
-                }
-            });
+            //console.log('END ['+id+']');
         }
         
         //$('#list_area tbody').html(new_table_rows);
     }
+
 
     pub.displayErrorVidmark = function() {
         console.log('errorVidmark called!');
@@ -447,7 +455,6 @@ net.silverbucket.vidmarks.appLogic = function() {
         if (!type) { type = 'info'; }
         $('#message').html('<p class="'+type+'">'+message+'</p>');
         $('#message p').delay(1000).fadeOut('slow');
-        //$('#message').html('<p>&nbsp;<br /></p>');
     }
 
     _.updateTagStatus = function(id, message) {

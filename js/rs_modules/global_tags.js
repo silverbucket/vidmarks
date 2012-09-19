@@ -37,7 +37,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        * @returns {array}
        */
       getTags: function() {
-        console.log('TAGS: getTags()');
+        //console.log('TAGS: getTags()');
         tags = privateClient.getListing(''); 
         num_tags = tags.length;
         r_tags = [];
@@ -54,7 +54,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        * @returns {array} array of tag names
        */
       getTagsByRecord: function(recordId) {
-        console.log("TAGS: getTagsByRecord\n*****************");
+        console.log("TAGS: getTagsByRecord("+recordId+")");
         tags = this.getTags();
         tagNames = [];
         // get add instances of recordId from recordIds list
@@ -69,8 +69,6 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
             }
           }
         }
-        console.log('GTBR: recordId:', recordId);
-
         return tagNames;
       },
 
