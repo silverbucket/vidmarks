@@ -161,6 +161,7 @@ net.silverbucket.vidmarks.dbModel = function() {
         console.log('- DB: getting priviteLists...');
         //_.modules.bookmarks = remoteStorage.bookmarks.getPrivateList(_.app_namespace);
         _.modules.videos    = remoteStorage.videos.getPrivateList(_.app_namespace);
+        console.log('- DB: tags: ', remoteStorage.tags);
         _.modules.tags      = remoteStorage.tags;
         _.modules.tags.docType = 'videos';
 
@@ -183,6 +184,12 @@ net.silverbucket.vidmarks.dbModel = function() {
         _.modules.tags.on('change', function(obj) {
             console.log('DB CHANGE: tags on(change) fired.');
             console.log(obj);
+        });
+    }
+
+    pub.onAction = function(action, func) {
+        _.modules.videos.on(action, function(obj) {
+            func(obj);
         });
     }
 
@@ -289,9 +296,21 @@ net.silverbucket.vidmarks.appLogic = function() {
         _.nav = net.silverbucket.vidmarks.navMenu;
         _.nav.init(['list']);//, 'submit']);
         _.nav.toggle('list');
+        _.vidAPI = net.silverbucket.vidmarks.publicVideoSiteAPI;
         _.db = net.silverbucket.vidmarks.dbModel;
         _.db.init();
-        _.vidAPI = net.silverbucket.vidmarks.publicVideoSiteAPI;
+
+        _.db.onAction('change', function(event) {
+            console.log('DB.onAction EVENT: ', event);
+            if(event.newValue && event.oldValue) {
+                //updateBookmarkRow(event.path, event.newValue);
+            } else if(event.newValue) {
+                //addBookmarkRow(event.path, event.newValue);
+            } else {
+                //deleteBookmarkRow(event.path);
+            }
+        });
+        
 
 
         /*
@@ -395,7 +414,7 @@ net.silverbucket.vidmarks.appLogic = function() {
      */
     pub.displayNewVidmark = function(details) {        
         record_id = details['source']+'_'+details['vid_id'];
-        tags = []; // new entries wont have any tags
+        tags = [' ']; // new entries wont have any tags
         console.log('displayNewVidmark - vid_id:'+record_id, details);
         
         if (_.vidmarks[record_id]) {
@@ -508,11 +527,14 @@ net.silverbucket.vidmarks.appLogic = function() {
         $('article#'+id+' div.tags_status').html(message);
     }
     _.getInputTags = function(id) {
-        tag_list = $('article#'+id+' input.tag_list').val().split(/\,\s*/);
+        tag_list = $('article#'+id+' input.tag_list').val().replace(/\s+/g, '').split(/\,\s*/);
         console.log(tag_list);
         return tag_list;
     }
     _.formatTagList = function(tags) {
+        if (tags.length === 0) {
+            tags.push(' ');
+        }
         return tags.join(', ');
     }
 

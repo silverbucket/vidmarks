@@ -100,8 +100,11 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         if (typeof recordIds === 'string') {
           recordIds = [recordIds];
         }
-        
+        tageName = tagName.replace(/\s+/g, ''); // no whitespace
         var obj = privateClient.getObject(tagName+'/'+this.docType);
+        if (!obj) {
+          obj = [];
+        }
         new_obj = obj.concat(recordIds).sort();
 
         // unique entries only
