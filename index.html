@@ -30,10 +30,9 @@
             <section id="submit">
                 <div id="submit_url_form_area">
                     <form name="submit_url_form" id="submit_url_form">
-                        <div class="label_container"><label for="vid_url">url:</label></div>
-                        <input id="input_vid_url" name="vid_url" class="required" value="" size="35"/>
+                        <div class="label_container"><label for="vid_url">url</label></div>
+                        <input id="input_vid_url" name="vid_url" class="required" value="" size="55"/>
                         <div class="counter_label_container">&nbsp; <br /></div>
-                        <p></p>
                     </form>
                 </div>
             </section>
@@ -42,9 +41,11 @@
         
 
         <aside>
-            <h2>tags</h2>
-            <ul id="full_tag_list">
-            </ul>
+            <div id="tags_box">
+                <h2>tags</h2>
+                <ul id="full_tag_list">
+                </ul>
+            </div>
         </aside>
 
 
@@ -60,7 +61,7 @@
         <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.0.min.js"><\/script>')</script>
 
-        <script src="http://remotestoragejs.com/build/0.7.0-dp1/remoteStorage-debug.js"></script>
+        <script src="http://remotestoragejs.com/build/0.7.0-dp2/remoteStorage-debug.js"></script>
         <script src="js/vendor/jsuri-1.1.1.min.js"></script>
 
         <script src="js/rs_modules/bookmarks.js"></script>
@@ -68,6 +69,7 @@
         <script src="js/rs_modules/global_tags.js"></script>
         
         <script src="js/plugins.js"></script>
+        <script src="js/video_site_api.js"></script>
         <script src="js/main.js"></script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->

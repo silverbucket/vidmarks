@@ -105,19 +105,21 @@ body {
 div#content_header {
     min-width: 1220px;
     display: block;
+    height: 135px;
 }
 
 div#logo {
-    margin: 10px auto auto auto;
+    float: left;
+    margin: 0px auto auto 50px;
     height: 80px;
     width: 250px;
 }
 
 
 section#submit {
-    margin: 5px auto 0px auto;
+    margin: 15px auto 10px auto;
     display: block;
-
+    width: 700px;
 }
 div#message p {
     margin: auto 25% auto 25%;
@@ -138,25 +140,31 @@ div#message p.info {
     background-color: #DDDDFF;
 }
 
-div#content_header {
-    height: 200px;
-}
-
 
 aside {
     float: left;
     position: absolute;
     top: 200px;
-    left: 0;
+    left: 20px;
     width: 170px;
     display: block;
+    background-color: #FAFAFA;
+    border-radius: 14px;
+    -webkit-border-radius: 14px;
+    -moz-border-radius: 14px;
+    -o-border-radius: 14px;
+    -icab-border-radius: 14px;
+    -khtml-border-radius: 14px;
 }
 aside h2 {
-    margin-left: 5px;
+    margin-left: -30px;
+    padding: 0px;
 }
+
 ul#full_tag_list {
     list-style: none; 
-    margin-top: 0px;
+    margin: 0px;
+    padding: 0 0 30px 0;
     display: inline-block;
     text-align: left;
     font-size: 0.9em;
@@ -164,6 +172,8 @@ ul#full_tag_list {
 }
 ul#full_tag_list li {
     display: inline-block;
+    padding: 0px;
+    margin: 0px;
 }
 
 section#vidmarks {
@@ -176,6 +186,7 @@ section#vidmarks {
 
 div#submit_url_form_area {
     display: inline-block;
+    margin-top: 30px;
 }
 
 input:not([type=submit]):not([type=file]) {
@@ -247,12 +258,11 @@ label {
 
 div.label_container {
     display: inline-block;
-    width: 170px;
+    margin-right: 20px;
 }
 
 div.counter_label_container {
     display: inline-block;
-    width: 140px;
 }
 
 div.tags {
