@@ -25,6 +25,10 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
 
       docType: 'default',
 
+      // XXX: this shouldn't be set globally, an app should be able to
+      // use tags for different modules at the same time.
+      // < _n_> Take a look at the tasks module for example
+      // doc: http://remotestoragejs.com/doc/code/files/modules/tasks-js.html
       setDocType: function(docType) {
         docType = docType;
       },
@@ -44,7 +48,10 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         return r_tags;
       },
 
-
+      // XXX: this wont scale
+      // < _n_> you have tags/:tagName/:docType -> [recordId]
+      // < _n_> then I would do:
+      // < _n_> tags/tags/:tagName/:docType -> [recordId] and tags/reverse/:docType/:recordId -> [:tag]
       /**
        * get a list of all tags which have a specified record ID
        * @param {string} record id
@@ -68,8 +75,6 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         return tagNames;
       },
 
-
-
       /**
        * get list of record IDs for this app which have the tag specified.
        * @param {string} the name of the tag
@@ -85,7 +90,6 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         //console.log(return_val);
         return return_val;
       },
-
 
       /**
        * add to a list of record IDs to a tag.
@@ -117,7 +121,6 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         privateClient.storeObject('tag', tagName+'/'+this.docType, unique_obj);
       },
 
-
       /**
        * sets a list of tags for an id
        * @params {string} record ID
@@ -130,7 +133,6 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
           this.addTagged(tagNames[i], appId);
         }
       },
-
 
       /**
        * removes an ID from a specified tag
@@ -157,7 +159,6 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         }
         privateClient.storeObject('tag', tagName+'/'+this.docType, obj);
       },
-
 
       /**
        * remove the specified record ID from all tags
