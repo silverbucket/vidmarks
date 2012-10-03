@@ -2,7 +2,11 @@ if(!net) var net={};
 if(!net.silverbucket) net.silverbucket={};
 if(!net.silverbucket.vidmarks) net.silverbucket.vidmarks={};
 
-
+/**
+ * navMenu - little helper utility to handle navigation tasks
+ *
+ * requires: jQuery
+ */
 net.silverbucket.vidmarks.navMenu = function() {
     var pub = {};
     var _ = {};
@@ -173,12 +177,10 @@ net.silverbucket.vidmarks.dbModel = function() {
 }();
 
 
-
-
 /**
  * appLogic - generic app related methods and logic
  *
- * requires: jquery
+ * requires: jQuery
  */
 net.silverbucket.vidmarks.appLogic = function() {
     var pub = {};
@@ -204,7 +206,6 @@ net.silverbucket.vidmarks.appLogic = function() {
             }
         });
 
-
         /*
          * navigation
          */
@@ -221,7 +222,6 @@ net.silverbucket.vidmarks.appLogic = function() {
             return false;
         });
         /* */
-
 
         /*
          * form controls
@@ -279,9 +279,7 @@ net.silverbucket.vidmarks.appLogic = function() {
         pub.displayVidmarkList();
     };
 
-
     /*******************************/
-
 
     _.vidmarks = {};
     _.templates = {};
@@ -296,9 +294,7 @@ net.silverbucket.vidmarks.appLogic = function() {
                 '<input class="tag_list" type="text" size="50" name="tags" value="{6}"/>'+
                 '<div class="tags_status"></div></div>';
 
-
     /*******************************/
-
 
     /*
      * present new vidmark data for submition
@@ -354,7 +350,6 @@ net.silverbucket.vidmarks.appLogic = function() {
         });
     };
 
-
     /*
      * display existing vidmark entries
      */
@@ -379,7 +374,6 @@ net.silverbucket.vidmarks.appLogic = function() {
         }
     };
 
-
     /*
      * display tags and their counts in the aside bar
      */
@@ -397,7 +391,6 @@ net.silverbucket.vidmarks.appLogic = function() {
             //console.log('END ['+id+']');
         }
     };
-
 
     pub.displayErrorVidmark = function() {
         console.log('errorVidmark called!');
@@ -428,7 +421,6 @@ net.silverbucket.vidmarks.appLogic = function() {
         }
         return tags.join(', ');
     };
-
 
     /*
      * basic templating function, stolen from:

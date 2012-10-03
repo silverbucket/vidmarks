@@ -41,12 +41,6 @@ remoteStorage.defineModule('videos', function(privateClient, publicClient) {
         return privateClient.getObject(id);
       },
 
-      set: function(id, title) {
-        var obj = privateClient.getObject(id);
-        obj.title = title;
-        privateClient.storeObject('video', id, obj);
-      },
-
       add: function(details, id) {
         if (!id) {
           id = privateClient.getUuid();
