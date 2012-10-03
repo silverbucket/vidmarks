@@ -29,28 +29,6 @@ net.silverbucket.vidmarks.navMenu = function() {
 }();
 
 
-// /*
-//  * utilityFunctions - a collection of helper functions
-//  */
-//net.silverbucket.vidmarks.utilityFunctions = function() {
-//    Array.prototype.unique = function() {
-//        var a = this.concat();
-//        for(var i=0; i<a.length; ++i) {
-//            for(var j=i+1; j<a.length; ++j) {
-//                if(a[i] === a[j])
-//                    a.splice(j, 1);
-//            }
-//        }
-//
-//        return a;
-//    };
-//}();
-
-
-
-
-
-
 /**
  * dbModel - provides an abraction for the various remoteStorage.js modules required.
  *
@@ -67,15 +45,11 @@ net.silverbucket.vidmarks.dbModel = function() {
 
     pub.init = function() {
         console.log('- DB: init()');
-        //remoteStorage.claimAccess('bookmarks', 'rw');
         remoteStorage.claimAccess('videos', 'rw');
         remoteStorage.claimAccess('tags', 'rw');
-        remoteStorage.displayWidget('remotestorage-connect'); //after that (not before that) display widget
+        remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
 
-        console.log('- DB: getting priviteLists...');
-        //_.modules.bookmarks = remoteStorage.bookmarks.getPrivateList(_.app_namespace);
-        _.modules.videos    = remoteStorage.videos.getPrivateList(_.app_namespace);
-        console.log('- DB: tags: ', remoteStorage.tags);
+        _.modules.videos    = remoteStorage.videos;
         _.modules.tags      = remoteStorage.tags;
         _.modules.tags.docType = 'videos';
 

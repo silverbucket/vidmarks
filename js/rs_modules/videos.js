@@ -40,7 +40,7 @@ remoteStorage.defineModule('videos', function(privateClient, publicClient) {
       },
 
       get: function(id) {
-        return privateClient.get(id);
+        return privateClient.getObject(id);
       },
 
       set: function(id, title) {
