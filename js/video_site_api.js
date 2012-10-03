@@ -2,10 +2,10 @@ if(!net) var net={};
 if(!net.silverbucket) net.silverbucket={};
 
 
-/** 
+/**
  * videoSiteAPI - provides an abstraction interface to the various video site APIs
  *
- * requires: jquery, and jsuri 
+ * requires: jquery, and jsuri
  */
 net.silverbucket.videoSiteAPI = function(window, undefined) {
     var pub = {};
@@ -43,19 +43,19 @@ net.silverbucket.videoSiteAPI = function(window, undefined) {
             _.error_message = 'unsupported or invalid url';
             return false;
         }
-    }
+    };
 
     pub.getErrorMessage = function() {
         var msg =  _.error_message;
         _.error_message = '';
         return msg;
-    }
+    };
 
     _.youtube.retrieveDetails = function(vid_id, successFunc) {
         $.ajax({
                 url: "http://gdata.youtube.com/feeds/api/videos/"+vid_id+"?v=2&alt=json",
                 dataType: "jsonp",
-                success: function (data) { 
+                success: function (data) {
                         console.log('vidAPI.retrieveDetails() - GET successful');
                         console.log(data);
                         var details = {};
@@ -68,14 +68,14 @@ net.silverbucket.videoSiteAPI = function(window, undefined) {
                         details['visit_url'] = 'http://youtube.com/watch?v='+vid_id;
                         details['source'] = 'youtube';
                         //console.log('compiled details:', details);
-                        successFunc(details); 
+                        successFunc(details);
                     },
                 error: function (jqXHR, textStatus, errorThrown) {
                         console.log('GET failed ['+textStatus+']: '+errorThrown);
                         failFunc();
                     }
             });
-    }
+    };
 
     _.findStringInArray = function(string, stringArray) {
         var num_entries = stringArray.length;
@@ -84,6 +84,7 @@ net.silverbucket.videoSiteAPI = function(window, undefined) {
             if (stringArray[j].match (string)) return true;
         }
         return false;
-    }
+    };
+
     return pub;
 }(this);

@@ -5,12 +5,11 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
 
   moduleName = 'tags';
 
-  
   return {
     name: moduleName,
 
     dataHints: {
-      "module" : "Store URLs which you do not wish to forget"
+      "module" : "A globally accessible record of tag names, which you can attach to items in other modules"
     },
 
     exports: {
@@ -38,7 +37,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        */
       getTags: function() {
         //console.log('TAGS: getTags()');
-        tags = privateClient.getListing(''); 
+        tags = privateClient.getListing('');
         num_tags = tags.length;
         r_tags = [];
         for (i = 0; i < num_tags; i++) {
@@ -82,7 +81,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         console.log('TAGS: getTagged('+tagName+'/'+this.docType+')');
         return_val = [];
         var val = privateClient.getObject(tagName+'/'+this.docType);
-        if (val != undefined) {
+        if (val !== undefined) {
           return_val = val;
         }
         //console.log(return_val);
@@ -134,7 +133,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         }
       },
 
-      
+
       /**
        * removes an ID from a specified tag
        * @param {string} tag name
@@ -161,7 +160,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         privateClient.storeObject('tag', tagName+'/'+this.docType, obj);
       },
 
-      
+
       /**
        * remove the specified record ID from all tags
        * @params {string} record ID
@@ -176,5 +175,5 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
       }
 
     }
-  }
+  };
 });

@@ -1,114 +1,57 @@
-remoteStorage.defineModule('videos', function(myPrivateBaseClient, myPublicBaseClient) {
-  var errorHandlers=[];
-  function fire(eventType, eventObj) {
-    if(eventType == 'error') {
-      for(var i=0; i<errorHandlers.length; i++) {
-        errorHandlers[i](eventObj);
-      }
-    }
-  }
-  function getUuid() {
-    var uuid = '',
-        i,
-        random;
+remoteStorage.defineModule('videos', function(privateClient, publicClient) {
 
-    for ( i = 0; i < 32; i++ ) {
-        random = Math.random() * 16 | 0;
-        if ( i === 8 || i === 12 || i === 16 || i === 20 ) {
-            uuid += '-';
-        }
-        uuid += ( i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random) ).toString( 16 );
-    }
-    return uuid;
-  }
-  function getPrivateList(listName) {
-    myPrivateBaseClient.sync(listName+'/');
-    function getIds() {
-      return myPrivateBaseClient.getListing(listName+'/');
-    }
-    function get(id) {
-      return myPrivateBaseClient.getObject(listName+'/'+id);
-    }
-    function set(id, title) {
-      var obj = myPrivateBaseClient.getObject(listName+'/'+id);
-      obj.title = title;
-      myPrivateBaseClient.storeObject('video', listName+'/'+id, obj);
-    }
-    function add(details, id) {
-      if (!id) {
-        var id = getUuid();
-      }
-      var status = myPrivateBaseClient.storeObject('video', listName+'/'+id, details);
-      return id;
-    }
-    function markCompleted(id, completedVal) {
-      if(typeof(completedVal) == 'undefined') {
-        completedVal = true;
-      }
-      var obj = myPrivateBaseClient.getObject(listName+'/'+id);
-      if(obj && obj.completed != completedVal) {
-        obj.completed = completedVal;
-        myPrivateBaseClient.storeObject('video', listName+'/'+id, obj);
-      }
-    }
-    function isCompleted(id) {
-      var obj = get(id);
-      return obj && obj.completed;
-    }
-    function getStats() {
-      var ids = getIds();
-      var stat = {
-        todoCompleted: 0,
-        totalTodo: ids.length
-      };
-      for (var i=0; i<stat.totalTodo; i++) {
-        if (isCompleted(ids[i])) {
-          stat.todoCompleted += 1;
-        }
-      }
-      stat.todoLeft = stat.totalTodo - stat.todoCompleted;
-      return stat;
-    }
-    function remove(id) {
-      myPrivateBaseClient.remove(listName+'/'+id);
-    }
-    function on(eventType, cb) {
-      myPrivateBaseClient.on(eventType, cb);
-      if(eventType == 'error') {
-        errorHandlers.push(cb);
-      }
-    }
-    return {
-      getIds        : getIds,
-      get           : get,
-      set           : set,
-      add           : add,
-      remove        : remove,
-      markCompleted : markCompleted,
-      getStats      : getStats,
-      on            : on
-    };
-  }
+  privateClient.sync('');
+  publicClient.sync('');
+
+  moduleName = 'videos';
+
   return {
-    name: 'videos',
+    name: moduleName,
+
     dataHints: {
-      "module": "videos are web URLs",
-      
-      "objectType video": "a reference to a place you'd like to return to at some point.",
-      "string video#title": "the title of the place the video points to",
-      "string video#embed_url": "location video points to for embedding purposes",
-      "string video#visit_url": "location video points to for browsing to",
-      "text video#description": "description of the video",
-      "string video#thumbnail": "thumbnail image of the video",
-      "int video#duration": "duration of the video in seconds",
-      "string video#source": "source of video (ie. youtube, vimeo, local)",
-      
-      "directory videos/": "default private list",
-      "directory videos/:year/": "videos created during year :year",
-      "directory public/videos/:hash/": "video list shared to for instance a team"
+      "module" : "Store video data metadata"
     },
+
     exports: {
-      getPrivateList: getPrivateList
+
+      // remoteStorage.bookmarks.on('change', function(changeEvent) {
+      //   if(changeEvent.newValue && changeEvent.oldValue) {
+      //    changeEvent.origin:
+      //      * window - event come from current window
+      //            -> ignore it
+      //      * device - same device, other tab (/window/...)
+      //      * remote - not related to this app's instance, some other app updated something on remoteStorage
+      //   }
+      // });
+      on: privateClient.on,
+
+
+      getIds: function() {
+        return privateClient.getListing('');
+      },
+
+      get: function(id) {
+        return privateClient.get(id);
+      },
+
+      set: function(id, title) {
+        var obj = privateClient.getObject(id);
+        obj.title = title;
+        privateClient.storeObject('video', id, obj);
+      },
+
+      add: function(details, id) {
+        if (!id) {
+          id = getUuid();
+        }
+        var status = privateClient.storeObject('video', id, details);
+        return id;
+      },
+
+      remove: function(id) {
+        privateClient.remove(id);
+      }
+
     }
   };
 });
