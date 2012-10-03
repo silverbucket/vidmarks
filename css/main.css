@@ -110,7 +110,7 @@ div#content_header {
 
 div#logo {
     float: left;
-    margin: 0px auto auto 50px;
+    margin: 0 auto auto 50px;
     height: 80px;
     width: 250px;
 }
@@ -123,12 +123,12 @@ section#submit {
 }
 div#message p {
     margin: auto 25% auto 25%;
-    border-radius: 12px;
     -webkit-border-radius: 12px;
     -moz-border-radius: 12px;
     -o-border-radius: 12px;
     -icab-border-radius: 12px;
     -khtml-border-radius: 12px;
+    border-radius: 12px;
 }
 div#message p.success {
     background-color: #DDFFDD;
@@ -149,21 +149,21 @@ aside {
     width: 170px;
     display: block;
     background-color: #FAFAFA;
-    border-radius: 14px;
     -webkit-border-radius: 14px;
     -moz-border-radius: 14px;
     -o-border-radius: 14px;
     -icab-border-radius: 14px;
     -khtml-border-radius: 14px;
+    border-radius: 14px;
 }
 aside h2 {
     margin-left: -30px;
-    padding: 0px;
+    padding: 0;
 }
 
 ul#full_tag_list {
-    list-style: none; 
-    margin: 0px;
+    list-style: none;
+    margin: 0;
     padding: 0 0 30px 0;
     display: inline-block;
     text-align: left;
@@ -172,8 +172,8 @@ ul#full_tag_list {
 }
 ul#full_tag_list li {
     display: inline-block;
-    padding: 0px;
-    margin: 0px;
+    padding: 0;
+    margin: 0;
 }
 
 section#vidmarks {
@@ -190,24 +190,24 @@ div#submit_url_form_area {
 }
 
 input:not([type=submit]):not([type=file]) {
-    border: 2px solid rgba(20, 99, 206, .3); 
-    -webkit-box-shadow: 
+    border: 2px solid rgba(20, 99, 206, .3);
+    -webkit-box-shadow:
       inset 0 0 8px  rgba(20,88,206,0.2),
-            0 0 16px rgba(20,88,206,0.2); 
-    -moz-box-shadow: 
+            0 0 16px rgba(20,88,206,0.2);
+    -moz-box-shadow:
       inset 0 0 8px  rgba(20,88,206,0.2),
-            0 0 16px rgba(20,88,206,0.2); 
-    box-shadow: 
+            0 0 16px rgba(20,88,206,0.2);
+    box-shadow:
       inset 0 0 8px  rgba(20,88,206,0.2),
-            0 0 16px rgba(20,88,206,0.2); 
+            0 0 16px rgba(20,88,206,0.2);
     padding: 10px;
     background: rgba(255,255,255,0.5);
-    border-radius: 4px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     -o-border-radius: 4px;
     -icab-border-radius: 4px;
     -khtml-border-radius: 4px;
+    border-radius: 4px;
     margin: 0 0 8px 0;
 }
 input[type=submit] {
@@ -217,26 +217,26 @@ input[type=submit] {
 }
 
 form input.error {
-    border-color: rgba(246, 20, 29, .3) !important; 
+    border-color: rgba(246, 20, 29, .3) !important;
 }
 
-form input.valid {
-    border-color: rgba(20, 156, 20, .3) !important; 
+form .valid {
+    border-color: rgba(20, 156, 20, .3) !important;
 }
 
 article.vidmark {
-    margin: 0px 10% 40px 200px;
+    margin: 0 10% 40px 200px;
     padding: 15px;
     display: inline-block;
     min-width: 990px;
     /*height: 520px;*/
     min-height: 520px;
-    border-radius: 12px;
     -webkit-border-radius: 12px;
     -moz-border-radius: 12px;
     -o-border-radius: 12px;
     -icab-border-radius: 12px;
     -khtml-border-radius: 12px;
+    border-radius: 12px;
     border-top: 1px solid #D0D0D0;
 }
 article.new_vidmark {
@@ -282,7 +282,7 @@ article h1 {
 article h3 {
     font-size: 10pt;
     margin: 15px auto auto auto;
-    padding: 0px;
+    padding: 0;
     text-align: left;
 }
 article div.video_embed {
@@ -312,8 +312,8 @@ article div.description {
 }
 article p.description {
     text-align: left;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
 }
 
 article p.status {
@@ -337,12 +337,12 @@ footer a, .button {
     font-size: 1.3em;
     padding: 8px 12px 12px 12px;
     background-color: rgba(20, 99, 206, 0.05);
-    border-radius: 8px;
     -webkit-border-radius: 8px;
     -moz-border-radius: 8px;
     -o-border-radius: 8px;
     -icab-border-radius: 8px;
     -khtml-border-radius: 8px;
+    border-radius: 8px;
     text-decoration: none;
     color: rgba(20, 20, 255, 1);
     cursor: pointer;
