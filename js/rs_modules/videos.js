@@ -9,7 +9,16 @@ remoteStorage.defineModule('videos', function(privateClient, publicClient) {
     name: moduleName,
 
     dataHints: {
-      "module" : "Store video data metadata"
+      "module" : "Store video data metadata",
+
+      "objectType video": "a reference to a place you'd like to return to at some point.",
+      "string video#title": "the title of the place the video points to",
+      "string video#embed_url": "location video points to for embedding purposes",
+      "string video#visit_url": "location video points to for browsing to",
+      "text video#description": "description of the video",
+      "string video#thumbnail": "thumbnail image of the video",
+      "int video#duration": "duration of the video in seconds",
+      "string video#source": "source of video (ie. youtube, vimeo, local)",
     },
 
     exports: {
