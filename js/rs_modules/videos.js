@@ -1,9 +1,7 @@
 remoteStorage.defineModule('videos', function(privateClient, publicClient) {
-
+  var moduleName = 'videos';
   privateClient.sync('');
   publicClient.sync('');
-
-  moduleName = 'videos';
 
   return {
     name: moduleName,
@@ -51,7 +49,7 @@ remoteStorage.defineModule('videos', function(privateClient, publicClient) {
 
       add: function(details, id) {
         if (!id) {
-          id = getUuid();
+          id = privateClient.getUuid();
         }
         var status = privateClient.storeObject('video', id, details);
         return id;
