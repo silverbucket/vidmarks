@@ -1,9 +1,7 @@
 remoteStorage.defineModule('tags', function(privateClient, publicClient) {
-
+  var moduleName = 'tags';
   privateClient.sync('');
   publicClient.sync('');
-
-  moduleName = 'tags';
 
   return {
     name: moduleName,
@@ -37,10 +35,10 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        */
       getTags: function() {
         //console.log('TAGS: getTags()');
-        tags = privateClient.getListing('');
-        num_tags = tags.length;
-        r_tags = [];
-        for (i = 0; i < num_tags; i++) {
+        var tags = privateClient.getListing('');
+        var num_tags = tags.length;
+        var r_tags = [];
+        for (var i = 0; i < num_tags; i++) {
           r_tags.push(tags[i].replace(/\//g,""));
         }
         return r_tags;
@@ -54,14 +52,14 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        */
       getTagsByRecord: function(recordId) {
         console.log("TAGS: getTagsByRecord("+recordId+")");
-        tags = this.getTags();
-        tagNames = [];
+        var tags = this.getTags();
+        var tagNames = [];
         // get add instances of recordId from recordIds list
-        num_tags = tags.length;
-        for (i = 0; i < num_tags; i++) {
-          recordIds = this.getTagged(tags[i]);
-          num_records = recordIds.length;
-          for (j = 0; j < num_records; j++) {
+        var num_tags = tags.length;
+        for (var i = 0; i < num_tags; i++) {
+          var recordIds = this.getTagged(tags[i]);
+          var num_records = recordIds.length;
+          for (var j = 0; j < num_records; j++) {
             if (recordId === recordIds[j]) {
               tagNames.push(tags[i]);
             }
@@ -79,7 +77,7 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        */
       getTagged: function(tagName) {
         console.log('TAGS: getTagged('+tagName+'/'+this.docType+')');
-        return_val = [];
+        var return_val = [];
         var val = privateClient.getObject(tagName+'/'+this.docType);
         if (val !== undefined) {
           return_val = val;
@@ -99,18 +97,18 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         if (typeof recordIds === 'string') {
           recordIds = [recordIds];
         }
-        tageName = tagName.replace(/\s+/g, ''); // no whitespace
+        var tageName = tagName.replace(/\s+/g, ''); // no whitespace
         var obj = privateClient.getObject(tagName+'/'+this.docType);
         if (!obj) {
           obj = [];
         }
-        new_obj = obj.concat(recordIds).sort();
+        var new_obj = obj.concat(recordIds).sort();
 
         // unique entries only
-        num_new_obj = new_obj.length;
-        unique_obj = [];
+        var num_new_obj = new_obj.length;
+        var unique_obj = [];
         for(var i=0; i < num_new_obj; ++i) {
-          if(new_obj[i] !== new_obj[i+1]) {
+          if (new_obj[i] !== new_obj[i+1]) {
             unique_obj.push(new_obj[i]);
           }
         }
@@ -127,8 +125,8 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        */
       addTagsToRecord: function(appId, tagNames) {
         console.log('TAGS: addTagsToRecord');
-        num_tagNames = tagNames.length;
-        for (i = 0; i < num_tagNames; i++) {
+        var num_tagNames = tagNames.length;
+        for (var i = 0; i < num_tagNames; i++) {
           this.addTagged(tagNames[i], appId);
         }
       },
@@ -147,10 +145,10 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
         var obj = privateClient.getObject(tagName+'/'+this.docType);
 
         // remove all occurences of appId(s) from obj list
-        num_ids = recordIds.length;
-        for (i = 0; i < num_ids; i++) {
-          num_objs = obj.length;
-          for (j = 0; j < num_objs; j++) {
+        var num_ids = recordIds.length;
+        for (var i = 0; i < num_ids; i++) {
+          var num_objs = obj.length;
+          for (var j = 0; j < num_objs; j++) {
             if (recordIds[i] === obj[j]) {
               obj.splice(j, 1);
               break;
@@ -167,13 +165,12 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
        */
       removeRecord: function(appId) {
         console.log('TAGS: removeRecord()');
-        tags = this.getTags();
-        num_tags = tags.length;
-        for (i = 0; i < num_tags; i++) {
+        var tags = this.getTags();
+        var num_tags = tags.length;
+        for (var i = 0; i < num_tags; i++) {
           this.removeTagged(tags[i], appId);
         }
       }
-
     }
   };
 });
