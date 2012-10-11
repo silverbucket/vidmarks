@@ -1,0 +1,3 @@
+[submodule "lib/always"]
+	path = lib/always
+	url = git@github.com:silverbucket/always
