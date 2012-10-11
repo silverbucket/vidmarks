@@ -1,4 +1,6 @@
 language: node_js
 node_js:
   - 0.6
+before_install:
+  git submodule init && git submodule --quiet update
 script: cd lib/always/ && npm install && npm test && cd ../../ && npm test
