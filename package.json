@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "test": "lib/always/bin/always"
+    "test": "node lib/always/bin/always"
   }
 }
 
