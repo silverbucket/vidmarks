@@ -1,4 +1,4 @@
-remoteStorage.defineModule('tags', function(privateClient, publicClient) {
+var global_tags = remoteStorage.defineModule('tags', function(privateClient, publicClient) {
   var moduleName = 'tags';
   privateClient.sync('');
   publicClient.sync('');
@@ -260,3 +260,5 @@ remoteStorage.defineModule('tags', function(privateClient, publicClient) {
     }
   };
 });
+if(!module) var module={};
+module.exports = global_tags;

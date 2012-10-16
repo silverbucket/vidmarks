@@ -263,11 +263,11 @@ net.silverbucket.vidmarks.appLogic = function() {
         $("section#vidmarks").on('keypress', 'input.tag_list', function (e) {
             if (e.which == 13) {
                 console.log(e);
-                var id = $(this).parent().parent().attr('id')
+                var id = $(this).parent().parent().attr('id');
                 console.log('ENTER was pressed tag field ['+id+']');
                 var tag_list = _.getInputTags(id);
                 console.log(tag_list);
-                _.db.addTagsToRecord(id, tag_list, function(){_.updateTagStatus(id, 'tags updated!')});
+                _.db.addTagsToRecord(id, tag_list, function(){_.updateTagStatus(id, 'tags updated!');});
                 pub.displayTagList(); // update tags list
                 e.preventDefault();
                 return false;
