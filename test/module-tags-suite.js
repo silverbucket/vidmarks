@@ -29,7 +29,7 @@ suites.push({
         env.presets.docType = 'videos';
         env.presets.getTags = ['dog', 'cat', 'horse', 'aardvark'];
         env.presets.getTagsByRecord = ['dog', 'horse'];
-        env.presets.getTagged = ['34567', 'defgh'];
+        env.presets.getTagged = ['34567', 'abcde'];
 
 
         env.defineModule = new this.Stub(function(name, func) {
@@ -51,7 +51,7 @@ suites.push({
 
         // getListing calls are handle by this stub
         env.pClient.getListing = new this.Stub(function(path) {
-            if (path.search(/^names\/$/) !== -1) {
+            if (path.match(/^names\/$/) !== -1) {
                 // getTags()
                 // return list of tag names
                 var num_tags = env.presets.data.names.length;
@@ -61,20 +61,25 @@ suites.push({
                 }
                 return ret;
             }
-
             return false;
         });
 
         // getObject calls are handled by this stub
         env.pClient.getObject = new this.Stub(function(path) {
+            var p;
+            var d = false;
             if (path.match(/^reverse\/\w+\/\d+$/)) {
                 // getTagByRecord()
-                var parts = path.match(/^reverse\/(\w+)\/(\d+)$/);
-                var d = env.presets.data.reverse[parts[1]][parts[2]];
-                return d;
+                p = path.match(/^reverse\/(\w+)\/(\d+)$/);
+                d = env.presets.data.reverse[p[1]][p[2]];
+            } else if (path.match(/^names\/\w+\/\w+$/) !== -1) {
+                p = path.match(/^names\/(\w+)\/(\w+)$/);
+                d = env.presets.data.names[p[1]][p[2]];
             }
-            return false;
+            return d;
         });
+
+
 
         this.result(true);
     },
@@ -153,6 +158,13 @@ suites.push({
             run: function(env) {
                 var d = env.tagModule.exports.getTagsByRecord('12345');
                 this.assert(d, env.presets.getTagsByRecord);
+            }
+        },
+        {
+            desc: "getTagged should return a list of ids for that tag",
+            run: function(env) {
+                var d = env.tagModule.exports.getTagged('cat');
+                this.assert(d, env.presets.getTagged);
             }
         }
     ]

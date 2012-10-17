@@ -77,7 +77,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
         //console.log('TAGS: getTagged('+tagName+'/'+this.docType+')');
         var return_val = [];
         var val = privateClient.getObject('names/'+tagName+'/'+this.docType);
-        if (val === "array") {
+        if (typeof val === "object") {
           return_val = val;
         }
         return return_val;
