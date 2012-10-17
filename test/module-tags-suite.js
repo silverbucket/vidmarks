@@ -29,7 +29,7 @@ suites.push({
         env.presets.docType = 'videos';
         env.presets.getTags = ['dog', 'cat', 'horse', 'aardvark'];
         env.presets.getTagsByRecord = ['dog', 'horse'];
-        env.presets.getTagged = ['34567', 'abcde'];
+        env.presets.getTagged = ['34567', 'defgh'];
 
 
         env.defineModule = new this.Stub(function(name, func) {
@@ -68,17 +68,32 @@ suites.push({
         env.pClient.getObject = new this.Stub(function(path) {
             var p;
             var d = false;
-            if (path.match(/^reverse\/\w+\/\d+$/)) {
-                // getTagByRecord()
-                p = path.match(/^reverse\/(\w+)\/(\d+)$/);
-                d = env.presets.data.reverse[p[1]][p[2]];
-            } else if (path.match(/^names\/\w+\/\w+$/) !== -1) {
-                p = path.match(/^names\/(\w+)\/(\w+)$/);
-                d = env.presets.data.names[p[1]][p[2]];
+            if (path.match(/^\w+\/\w+\/\d+$/)) {
+                p = path.match(/^(\w+)\/(\w+)\/(\d+)$/);
+            } else if (path.match(/^\w+\/\w+\/\w+$/) !== -1) {
+                p = path.match(/^(\w+)\/(\w+)\/(\w+)$/);
+            } else {
+                return false;
             }
+            d = env.presets.data[p[1]][p[2]][p[3]];
             return d;
         });
 
+        // storeObject calls are handled by this stub
+        env.pClient.storeObject = new this.Stub(function(type, path, obj) {
+            var p;
+            var d = false;
+            if (path.match(/^\w+\/\w+\/\d+$/)) {
+                p = path.match(/^(\w+)\/(\w+)\/(\d+)$/);
+            } else if (path.match(/^\w+\/\w+\/\w+$/) !== -1) {
+                p = path.match(/^(\w+)\/(\w+)\/(\w+)$/);
+            } else {
+                return false;
+            }
+            console.log(env.presets.data[p[1]][p[2]][p[3]]);
+            var tmp = env.presets.data[p[1]][p[2]][p[3]];
+            env.presets.data[p[1]][p[2]][p[3]] = obj;
+        });
 
 
         this.result(true);
@@ -163,7 +178,17 @@ suites.push({
         {
             desc: "getTagged should return a list of ids for that tag",
             run: function(env) {
-                var d = env.tagModule.exports.getTagged('cat');
+                var d = env.tagModule.exports.getTagged('aardvark');
+                this.assert(d, env.presets.getTagged);
+            }
+        },
+        {
+            desc: "addTagged should add a list of ids to a tag",
+            run: function(env) {
+                env.tagModule.exports.addTagged('aardvark', ['qwerty', 'foobar']);
+                var d = env.tagModule.exports.getTagged('aardvark');
+                env.presets.getTagged.push('qwerty');
+                env.presets.getTagged.push('foobar');
                 this.assert(d, env.presets.getTagged);
             }
         }

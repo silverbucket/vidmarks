@@ -89,7 +89,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @param {array}   recordIds - list of record IDs
        */
       addTagged: function(tagName, recordIds) {
-        console.log('TAGS: addTagged('+tagName+'/'+this.docType+'):',recordIds);
+        //console.log('TAGS: addTagged('+tagName+'/'+this.docType+'):',recordIds);
         recordIds = this._ensureArray(recordIds);
 
         var tageName = tagName.replace(/\s+/g, ''); // no whitespace
@@ -111,7 +111,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @params {array}  tagNames -list og tag names
        */
       addTagsToRecord: function(recordId, tagNames) {
-        console.log('TAGS: addTagsToRecord');
+        //console.log('TAGS: addTagsToRecord');
         var num_tagNames = tagNames.length;
         for (var i = 0; i < num_tagNames; i++) {
           this.addTagged(tagNames[i], recordId);
