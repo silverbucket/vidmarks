@@ -30,7 +30,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
       // < _n_> Take a look at the tasks module for example
       // doc: http://remotestoragejs.com/doc/code/files/modules/tasks-js.html
       setDocType: function(docType) {
-        docType = docType;
+        this.docType = docType;
       },
 
       /**
@@ -62,27 +62,10 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
 
         var return_val = [];
         var val = privateClient.getObject('reverse/'+this.docType+'/'+recordId);
-        if (val === "array") {
+        if (typeof val === "object") {
           return_val = val;
         }
         return return_val;
-
-        /*
-        var tags = this.getTags();
-        var tagNames = [];
-        // get add instances of recordId from recordIds list
-        var num_tags = tags.length;
-        for (var i = 0; i < num_tags; i++) {
-          var recordIds = this.getTagged(tags[i]);
-          var num_records = recordIds.length;
-          for (var j = 0; j < num_records; j++) {
-            if (recordId === recordIds[j]) {
-              tagNames.push(tags[i]);
-            }
-          }
-        }
-        return tagNames;
-        */
       },
 
       /**
