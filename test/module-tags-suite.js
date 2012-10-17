@@ -4,6 +4,34 @@ suites.push({
 	name: "tags module",
 	desc: "collections of tests for the global_tags.js module",
     setup: function(env) {
+        env.presets = {};
+        // a sample data set which should properly represet the way remoteStorage
+        // data is stored.
+        env.presets.data = {
+            'names': {
+                'dog': { 'videos': [ '12345', '67890', 'abcde', 'fghij' ]},
+                'cat': { 'videos': [ '34567', 'abcde' ]},
+                'horse': { 'videos': [ '12345', 'fghij', '67890' ]},
+                'aardvark': { 'videos': [ '34567', 'defgh' ]}
+            },
+            'reverse': {
+                'videos': {
+                    '12345': ['horse', 'dog'],
+                    '67890': ['horse', 'dog'],
+                    'abcde': ['cat', 'dog'],
+                    'fghij': ['horse', 'dog'],
+                    '34567': ['cat', 'aardvark'],
+                    'defgh': ['aardvark']
+                }
+            }
+        };
+        // the expected restults from the various module functions called
+        env.presets.docType = 'videos';
+        env.presets.getTags = ['dog', 'cat', 'horse', 'aardvark'];
+        env.presets.getTagsByRecord = ['dog', 'horse'];
+        env.presets.getTagged = ['34567', 'defgh'];
+        
+
         env.defineModule = new this.Stub(function(name, func) {
             ret = [];
             ret[0] = name;
@@ -19,6 +47,33 @@ suites.push({
 
         env.pClient.sync = new this.Stub(function() {
             return true;
+        });
+
+        // getListing calls are handle by this stub
+        env.pClient.getListing = new this.Stub(function(path) {
+            if (path.search(/^names\/$/) !== -1) {
+                // getTags()
+                // return list of tag names
+                var num_tags = env.presets.data.names.length;
+                var ret = [];
+                for (var key in env.presets.data.names) {
+                    ret.push(key);
+                }
+                return ret;
+            }
+
+            return false;
+        });
+
+        // getObject calls are handled by this stub
+        env.pClient.getObject = new this.Stub(function(path) {
+            if (path.match(/^reverse\/\w+\/\d+$/)) {
+                // getTagByRecord()
+                var parts = path.match(/^reverse\/(\w+)\/(\d+)$/);
+                var d = env.presets.data.reverse[parts[1]][parts[2]];
+                return d;
+            }
+            return false;
         });
         
         this.result(true);
@@ -77,6 +132,27 @@ suites.push({
             desc: "tag module has getTags function",
             run: function(env) {
                 this.assertType(env.tagModule.exports.getTags, 'function');
+            }
+        },
+        {
+            desc: "getTags should return our preset list of tag names",
+            run: function(env) {
+                var d = env.tagModule.exports.getTags();
+                this.assert(d, env.presets.getTags);
+            }
+        },
+        {
+            desc: "setDocType should be called",
+            run: function(env) {
+                env.tagModule.exports.setDocType(env.presets.docType);
+                this.assert(env.tagModule.exports.docType, env.presets.docType);
+            }
+        },
+        {
+            desc: "getTagsByRecord should return a list of tags for that id",
+            run: function(env) {
+                var d = env.tagModule.exports.getTagsByRecord('12345');
+                this.assert(d, env.presets.getTagsByRecord);
             }
         }
 	]
