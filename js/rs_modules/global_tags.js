@@ -1,7 +1,8 @@
 var global_tags = remoteStorage.defineModule('tags', function(privateClient, publicClient) {
+  "use strict";
   var moduleName = 'tags';
-  privateClient.sync('');
-  publicClient.sync('');
+  privateClient.use('');
+  publicClient.use('');
 
   return {
     name: moduleName,
@@ -58,8 +59,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @returns {array} array of tag names
        */
       getTagsByRecord: function(recordId) {
-        console.log("TAGS: getTagsByRecord("+recordId+")");
-
+        //console.log("TAGS: getTagsByRecord("+recordId+")");
         var return_val = [];
         var val = privateClient.getObject('reverse/'+this.docType+'/'+recordId);
         if (typeof val === "object") {
@@ -74,13 +74,12 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @returns {array}
        */
       getTagged: function(tagName) {
-        console.log('TAGS: getTagged('+tagName+'/'+this.docType+')');
+        //console.log('TAGS: getTagged('+tagName+'/'+this.docType+')');
         var return_val = [];
         var val = privateClient.getObject('names/'+tagName+'/'+this.docType);
         if (val === "array") {
           return_val = val;
         }
-        //console.log(return_val);
         return return_val;
       },
 
@@ -99,7 +98,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
           existingIds = [];
         }
 
-        unique_obj = this._mergeAndUnique(existingIds, recordIds);
+        var unique_obj = this._mergeAndUnique(existingIds, recordIds);
 
         this._addReverse(tagName, recordIds); // add ids to tags reverse lookup document
         //console.log('merged and unique result:', unique_obj);
@@ -166,7 +165,6 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        */
       _removeTagFromReverse: function(recordIds, tagName) {
         recordIds = this._ensureArray(recordIds);
-        tagNames = this._ensureArray(tagNames);
 
         var num_recordIds = recordIds.length;
         for (var i = 0; i < num_recordIds; i++) {
@@ -202,7 +200,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
             existingTags = [];
           }
 
-          uniqueTagNames = this._mergeAndUnique(existingTags, tagNames);
+          var uniqueTagNames = this._mergeAndUnique(existingTags, tagNames);
           console.log('STORING: reverse/'+this.docType+'/'+recordIds[i], uniqueTagNames);
           privateClient.storeObject('reverse', 'reverse/'+this.docType+'/'+recordIds[i], uniqueTagNames);
         }

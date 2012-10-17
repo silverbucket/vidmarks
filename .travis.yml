@@ -1,7 +1,4 @@
 language: node_js
 node_js:
   - 0.6
-before_install:
-  - git submodule update --init --quiet
-  - git submodule foreach git pull origin master
-script: cd lib/always/ && npm install && npm test && cd ../../ && npm test
+script: npm install && npm test

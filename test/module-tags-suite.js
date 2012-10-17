@@ -1,8 +1,8 @@
 module.exports = function() {
 var suites = [];
 suites.push({
-	name: "tags module",
-	desc: "collections of tests for the global_tags.js module",
+    name: "tags module",
+    desc: "collections of tests for the global_tags.js module",
     setup: function(env) {
         env.presets = {};
         // a sample data set which should properly represet the way remoteStorage
@@ -30,7 +30,7 @@ suites.push({
         env.presets.getTags = ['dog', 'cat', 'horse', 'aardvark'];
         env.presets.getTagsByRecord = ['dog', 'horse'];
         env.presets.getTagged = ['34567', 'defgh'];
-        
+
 
         env.defineModule = new this.Stub(function(name, func) {
             ret = [];
@@ -45,7 +45,7 @@ suites.push({
             return args;
         });
 
-        env.pClient.sync = new this.Stub(function() {
+        env.pClient.use = new this.Stub(function() {
             return true;
         });
 
@@ -75,10 +75,10 @@ suites.push({
             }
             return false;
         });
-        
+
         this.result(true);
     },
-	tests: [
+    tests: [
         {
             desc: "confirm defineModule stub function works",
             run: function(env) {
@@ -155,7 +155,7 @@ suites.push({
                 this.assert(d, env.presets.getTagsByRecord);
             }
         }
-	]
+    ]
 });
 return suites;
 }();
