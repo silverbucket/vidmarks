@@ -223,11 +223,19 @@ suites.push({
         {
             desc: "addTagsToRecord should add a list of tags to a recordId",
             run: function(env) {
-                env.tagModule.exports.addTagsToRecord('67890', ['penguin', 'travel']);
+                env.tagModule.exports.addTagsToRecord(['67890', '12345'], ['penguin', 'travel']);
                 var d = env.tagModule.exports.getTagsByRecord('67890');
                 env.presets.getTagsByRecord.push('penguin');
                 env.presets.getTagsByRecord.push('travel');
                 this.assert(d, env.presets.getTagsByRecord);
+            }
+        },
+        {
+            desc: "removeTagged should remove recordID from a tag",
+            run: function(env) {
+                env.tagModule.exports.removeTagged('travel', '67890');
+                var d = env.tagModule.exports.getTagged('travel');
+                this.assert(d, ['12345']);
             }
         }
     ]

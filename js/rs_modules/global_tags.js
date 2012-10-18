@@ -125,11 +125,11 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @param {array|string} id(s) of record to remove from list
        */
       removeTagged: function(tagName, recordIds) {
-        console.log('TAGS: removeTagged()');
+        //console.log('TAGS: removeTagged()');
         recordIds = this._ensureArray(recordIds);
 
         // get object for this tag
-        var existingIds = privateClient.getObject(tagName+'/'+this.docType);
+        var existingIds = privateClient.getObject('names/'+tagName+'/'+this.docType);
 
         // remove all occurences of appId(s) from existingIds list
         var num_recordIds = recordIds.length;
