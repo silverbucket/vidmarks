@@ -1,5 +1,5 @@
 var global_tags = remoteStorage.defineModule('tags', function(privateClient, publicClient) {
-  "use strict";
+  //"use strict";
   var moduleName = 'tags';
   privateClient.use('');
   publicClient.use('');
@@ -125,11 +125,11 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @param {array|string} id(s) of record to remove from list
        */
       removeTagged: function(tagName, recordIds) {
-        //console.log('TAGS: removeTagged()');
+        //console.log('TAGS: removeTagged('+tagName+', '+recordIds+')');
         recordIds = this._ensureArray(recordIds);
 
         // get object for this tag
-        var existingIds = privateClient.getObject('names/'+tagName+'/'+this.docType);
+        var existingIds = this.getTagged(tagName);
 
         // remove all occurences of appId(s) from existingIds list
         var num_recordIds = recordIds.length;
@@ -152,10 +152,10 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        */
       removeRecord: function(recordId) {
         //console.log('TAGS: removeRecord()');
-        var tags = this.getTags();
-        var num_tags = tags.length;
-        for (var i = 0; i < num_tags; i++) {
-          this.removeTagged(tags[i], recordId);
+        var tagList = this.getTagsByRecord('12345');
+        var num_tagList = tagList.length;
+        for (var i = 0; i < num_tagList; i++) {
+          this.removeTagged(tagList[i], recordId);
         }
       },
 
@@ -165,20 +165,23 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @params {string}       tagName  - tag name(s)
        */
       _removeTagFromReverse: function(recordIds, tagName) {
+        //console.log('TAG: _removeTagFromReverse('+recordIds+', '+tagName+')');
         recordIds = this._ensureArray(recordIds);
 
         var num_recordIds = recordIds.length;
         for (var i = 0; i < num_recordIds; i++) {
           // foreach record Id, remove all tags in it's obj
-          var existingTags = privateClient.getObject('reverse/'+recordIds[i]+'/'+this.docType);
+          var existingTags = this.getTagsByRecord(recordIds[i]);
           var num_existingTags = existingTags.length;
+          var updatedTags = [];
           for (var j = 0; j < num_existingTags; j++) {
             if (existingTags[j] === tagName) {
-              existingTags.splice(j, 1);
-              break;
+              continue;
+            } else {
+              updatedTags.push(existingTags[j]);
             }
           }
-          privateClient.storeObject('reverse', 'reverse/'+recordIds[i]+'/'+this.docType, existingTags);
+          privateClient.storeObject('reverse', 'reverse/'+this.docType+'/'+recordIds[i], updatedTags);
         }
       },
 

@@ -239,6 +239,13 @@ suites.push({
             }
         },
         {
+            desc: "verify that the reverse lookup was updated as well",
+            run: function(env) {
+                var d = env.tagModule.exports.getTagsByRecord('67890');
+                this.assert(d, ['dog', 'horse', 'penguin']);
+            }
+        },
+        {
             desc: "removeRecord should remove recordID from all tags",
             run: function(env) {
                 env.tagModule.exports.removeRecord('12345');
