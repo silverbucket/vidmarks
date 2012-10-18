@@ -160,7 +160,6 @@ suites.push({
             desc: "initialize module",
             run: function(env) {
                 env.tagModule = env.rs[1](env.pClient,env.pClient);
-                console.log(env.tagModule);
                 this.assertType(env.tagModule, 'object');
             }
         },
