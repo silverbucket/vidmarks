@@ -39,18 +39,18 @@ suites.push({
             return ret;
         });
 
-        env.pClient = new this.Stub(function(p) {
+        env.baseClient = new this.Stub(function(p) {
             console.log('privae/public client called');
             var args = Array.prototype.slice.call(arguments);
             return args;
         });
 
-        env.pClient.use = new this.Stub(function() {
+        env.baseClient.use = new this.Stub(function() {
             return true;
         });
 
         // getListing calls are handle by this stub
-        env.pClient.getListing = new this.Stub(function(path) {
+        env.baseClient.getListing = new this.Stub(function(path) {
             if (path.match(/^names\/$/) !== -1) {
                 // getTags()
                 // return list of tag names
@@ -65,7 +65,7 @@ suites.push({
         });
 
         // getObject calls are handled by this stub
-        env.pClient.getObject = new this.Stub(function(path) {
+        env.baseClient.getObject = new this.Stub(function(path) {
             var p;
             var d = false;
             if (path.match(/^\w+\/\w+\/\d+$/)) {
@@ -89,7 +89,7 @@ suites.push({
         });
 
         // storeObject calls are handled by this stub
-        env.pClient.storeObject = new this.Stub(function(type, path, obj) {
+        env.baseClient.storeObject = new this.Stub(function(type, path, obj) {
             var p;
             var d = false;
             if (path.match(/^\w+\/\w+\/\d+$/)) {
@@ -126,6 +126,10 @@ suites.push({
 
         this.result(true);
     },
+    takedown: function() {
+        delete global.remoteStorage;
+        this.result(true);
+    },
     tests: [
         {
             desc: "confirm defineModule stub function works",
@@ -137,9 +141,9 @@ suites.push({
             }
         },
         {
-            desc: "confirm pClient stub function works",
+            desc: "confirm baseClient stub function works",
             run: function(env) {
-                var func = env.pClient;
+                var func = env.baseClient;
                 vals = func('one','two', 'three', 'four', 'five', 'six');
                 params = ['one', 'two', 'three', 'four', 'five', 'six'];
                 this.assert(params, vals);
@@ -153,13 +157,15 @@ suites.push({
                 global.remoteStorage = remoteStorage;
 
                 env.rs = require('../js/rs_modules/global_tags.js');
+                // if we loaded the tag module correctly, it should have returned
+                // a function for us to use.
                 this.assertType(env.rs[1], 'function');
             }
         },
         {
             desc: "initialize module",
             run: function(env) {
-                env.tagModule = env.rs[1](env.pClient,env.pClient);
+                env.tagModule = env.rs[1](env.baseClient,env.baseClient);
                 this.assertType(env.tagModule, 'object');
             }
         },
@@ -250,6 +256,19 @@ suites.push({
                 env.tagModule.exports.removeRecord('12345');
                 var d = env.tagModule.exports.getTagsByRecord('12345');
                 this.assert(d, []);
+            }
+        }
+    ]
+});
+
+suites.push({
+    name: "test global namespace reset",
+    desc: "the global namespace should no longer have remoteStorage in it",
+    tests: [
+        {
+            desc: "make sure the global namespace doesn't have remoteStorage anymore",
+            run: function(env) {
+                this.assertType(global.remoteStorage, 'undefined');
             }
         }
     ]
