@@ -75,6 +75,15 @@ suites.push({
             } else {
                 return false;
             }
+
+            if (!env.presets.data[p[1]][p[2]]) {
+                // this tag name or docType doesn't exist
+                return [];
+            } else if (!env.presets.data[p[1]][p[2]][p[3]]) {
+                // this docType or recordID doesn't exist
+                return [];
+            }
+
             d = env.presets.data[p[1]][p[2]][p[3]];
             return d;
         });
@@ -90,7 +99,26 @@ suites.push({
             } else {
                 return false;
             }
-            console.log(env.presets.data[p[1]][p[2]][p[3]]);
+
+            if (!env.presets.data[p[1]][p[2]]) {
+                // this tag name or docType doesn't exist
+                if (p[1] === 'names') {
+                    // this tag does not exist, create it
+                    env.presets.data[p[1]][p[2]] = {};
+                    env.presets.data[p[1]][p[2]][p[3]] = [];
+                } else {
+                    return false;
+                }
+            } else if (!env.presets.data[p[1]][p[2]][p[3]]) {
+                // this docType or recordID doesn't exist
+                if (p[1] === 'reverse') {
+                    // this recordID does not exist, create it
+                    env.presets.data[p[1]][p[2]][p[3]] = [];
+                } else {
+                    return false;
+                }
+            }
+
             var tmp = env.presets.data[p[1]][p[2]][p[3]];
             env.presets.data[p[1]][p[2]][p[3]] = obj;
         });
@@ -190,6 +218,16 @@ suites.push({
                 env.presets.getTagged.push('qwerty');
                 env.presets.getTagged.push('foobar');
                 this.assert(d, env.presets.getTagged);
+            }
+        },
+        {
+            desc: "addTagsToRecord should add a list of tags to a recordId",
+            run: function(env) {
+                env.tagModule.exports.addTagsToRecord('67890', ['penguin', 'travel']);
+                var d = env.tagModule.exports.getTagsByRecord('67890');
+                env.presets.getTagsByRecord.push('penguin');
+                env.presets.getTagsByRecord.push('travel');
+                this.assert(d, env.presets.getTagsByRecord);
             }
         }
     ]

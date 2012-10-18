@@ -112,6 +112,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        */
       addTagsToRecord: function(recordId, tagNames) {
         //console.log('TAGS: addTagsToRecord');
+        tagNames = this._ensureArray(tagNames);
         var num_tagNames = tagNames.length;
         for (var i = 0; i < num_tagNames; i++) {
           this.addTagged(tagNames[i], recordId);
@@ -187,21 +188,21 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @param {array}   recordIds - list of record ids
        */
       _addReverse: function(tagNames, recordIds) {
-        console.log('TAG: _addReverse() called', tagNames, recordIds);
+        //console.log('TAG: _addReverse() called', tagNames, recordIds);
         tagNames = this._ensureArray(tagNames);
         recordIds = this._ensureArray(recordIds);
 
         var num_recordIds = recordIds.length;
-        for (var i = 0; i > num_recordIds; i++) {
-          console.log('****: _addReverse() - getting object');
+        for (var i = 0; i < num_recordIds; i++) {
+          //console.log('****: _addReverse() - getting object');
           var existingTags = privateClient.getObject('reverse/'+this.docType+'/'+recordIds[i]);
-          console.log('****: _addReverse() - getting object finished');
+          //console.log('****: _addReverse() - getting object finished');
           if (!existingTags) {
             existingTags = [];
           }
 
           var uniqueTagNames = this._mergeAndUnique(existingTags, tagNames);
-          console.log('STORING: reverse/'+this.docType+'/'+recordIds[i], uniqueTagNames);
+          //console.log('STORING: reverse/'+this.docType+'/'+recordIds[i], uniqueTagNames);
           privateClient.storeObject('reverse', 'reverse/'+this.docType+'/'+recordIds[i], uniqueTagNames);
         }
       },
