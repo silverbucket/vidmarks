@@ -237,6 +237,14 @@ suites.push({
                 var d = env.tagModule.exports.getTagged('travel');
                 this.assert(d, ['12345']);
             }
+        },
+        {
+            desc: "removeRecord should remove recordID from all tags",
+            run: function(env) {
+                env.tagModule.exports.removeRecord('12345');
+                var d = env.tagModule.exports.getTagsByRecord('12345');
+                this.assert(d, []);
+            }
         }
     ]
 });

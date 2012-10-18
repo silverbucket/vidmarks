@@ -151,7 +151,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
        * @params {string} recordId - record ID
        */
       removeRecord: function(recordId) {
-        console.log('TAGS: removeRecord()');
+        //console.log('TAGS: removeRecord()');
         var tags = this.getTags();
         var num_tags = tags.length;
         for (var i = 0; i < num_tags; i++) {
