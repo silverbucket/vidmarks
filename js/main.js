@@ -116,7 +116,7 @@ net.silverbucket.vidmarks.dbModel = function() {
 
     pub.getTagsByRecord = function(recordId) {
         var tags = _.modules.tags.getTagsByRecord(recordId);
-        console.log('DB getTagsByRecord -- ', tags);
+        console.log('DB getTagsByRecord('+recordId+') -- result: ', tags);
         return tags;
     };
 
