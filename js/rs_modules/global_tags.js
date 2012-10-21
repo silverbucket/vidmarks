@@ -101,7 +101,6 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
         var unique_obj = this._mergeAndUnique(existingIds, recordIds);
 
         this._addReverse(tagName, recordIds); // add ids to tags reverse lookup document
-        //console.log('merged and unique result:', unique_obj);
         privateClient.storeObject('tag', 'names/'+tagName+'/'+this.docType, unique_obj);
       },
 

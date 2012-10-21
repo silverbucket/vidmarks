@@ -158,7 +158,8 @@ net.silverbucket.vidmarks.dbModel = function() {
     };
 
     pub.getById = function(id) {
-        return _.modules.videos.get();
+        var obj = _.modules.videos.get();
+        return obj;
     };
 
     pub.deleteAll = function() {
