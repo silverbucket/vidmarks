@@ -13,24 +13,12 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
 
     exports: {
 
-      // remoteStorage.bookmarks.on('change', function(changeEvent) {
-      //   if(changeEvent.newValue && changeEvent.oldValue) {
-      //    changeEvent.origin:
-      //      * window - event come from current window
-      //            -> ignore it
-      //      * device - same device, other tab (/window/...)
-      //      * remote - not related to this app's instance, some other app updated something on remoteStorage
-      //   }
-      // });
-      on: privateClient.on,
-
-      docType: 'default',
-
-
       getPrivateListing: function(docType) {
         var pub = {};
         var _ = {};
         _.docType = docType;
+
+        pub.on = privateClient.on;
 
         /**
          * get list of existing tags
