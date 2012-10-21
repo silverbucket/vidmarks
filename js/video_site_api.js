@@ -30,7 +30,7 @@ net.silverbucket.videoSiteAPI = function(window, undefined) {
         var uri = new Uri(url);
         console.log('DEBUG: host:'+uri.host()+' path:'+uri.path()+' query:'+uri.query()+' v:'+uri.getQueryParamValue('v'));
         var match = false;
-        for (site in _.site_mapping) {
+        for (var site in _.site_mapping) {
             if (_.findStringInArray(uri.host(), _.site_mapping[site])) {
                 _[site].retrieveDetails(uri.getQueryParamValue('v'), successFunc, failFunc);
                 match = true;
@@ -63,7 +63,7 @@ net.silverbucket.videoSiteAPI = function(window, undefined) {
                         details['description'] = data.entry.media$group.media$description.$t;
                         details['embed_url'] = data.entry.content.src;
                         details['thumbnail'] = data.entry.media$group.media$thumbnail[2].url;
-                        details['duration'] = data.entry.media$group.yt$duration.seconds;
+                        details['duration'] = parseInt(data.entry.media$group.yt$duration.seconds);
                         details['vid_id'] = vid_id;
                         details['visit_url'] = 'http://youtube.com/watch?v='+vid_id;
                         details['source'] = 'youtube';
