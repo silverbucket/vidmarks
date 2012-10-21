@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "teste": "0.0.4a"
+    "teste": "*"
   },
   "scripts": {
     "test": "node_modules/.bin/teste"
