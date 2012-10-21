@@ -108,6 +108,11 @@ suites.push({
                     'visit_url': 'http://youtube.com/watch?v=098765',
                     'source': 'youtube'
                 };
+
+                env.vidModule.on('error', function(err) {
+                    console.log('DB ERROR: videos - '+err);
+                });
+
                 var id = env.vidModule.add(new_record, '098765');
 
                 var retrieve = env.vidModule.get('098765');

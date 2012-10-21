@@ -54,8 +54,8 @@ net.silverbucket.vidmarks.dbModel = function() {
         remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
 
         _.modules.videos    = remoteStorage.videos;
-        _.modules.tags      = remoteStorage.tags;
-        _.modules.tags.docType = 'videos';
+        _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
+        //_.modules.tags.docType = 'videos';
 
         // testing events, changing, behavior
         _.modules.videos.on('error', function(err) {

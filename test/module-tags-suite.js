@@ -39,7 +39,8 @@ suites.push({
         // if we loaded the tag module correctly, it should have returned
         // a function for us to use.
         this.assertTypeAnd(env.moduleImport, 'function');
-        env.tagModule = moduleImport[1](env.remoteStorage.baseClient, env.remoteStorage.baseClient).exports;
+        var tagModule_exports = moduleImport[1](env.remoteStorage.baseClient, env.remoteStorage.baseClient).exports;
+        env.tagModule = tagModule_exports.getPrivateListing('videos');
         this.assertType(env.tagModule, 'object');
     },
     tests: [
@@ -54,13 +55,6 @@ suites.push({
             run: function(env) {
                 var d = env.tagModule.getTags();
                 this.assert(d, env.presets.getTags);
-            }
-        },
-        {
-            desc: "setDocType should be called",
-            run: function(env) {
-                env.tagModule.setDocType(env.presets.docType);
-                this.assert(env.tagModule.docType, env.presets.docType);
             }
         },
         {
