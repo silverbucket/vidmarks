@@ -1,7 +1,46 @@
-remoteStorage.defineModule('videos', function(privateClient, publicClient) {
+var videos = remoteStorage.defineModule('videos', function(privateClient, publicClient) {
   var moduleName = 'videos';
-  privateClient.sync('');
-  publicClient.sync('');
+  privateClient.use('');
+  publicClient.use('');
+
+  privateClient.declareType('video', {
+    "description" : "a reference to a place you'd like to return to at some point.",
+    "type" : "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "the title of the place the video points to",
+        "required": true
+      },
+      "embed_url": {
+        "type": "string",
+        "description": "location video points to for embedding purposes",
+        "format": "uri"
+      },
+      "visit_url": {
+        "type": "string",
+        "description": "location video points to for browsing to",
+        "format" : "uri"
+      },
+      "description": {
+        "type": "string",
+        "description": "description of the video"
+      },
+      "thumbnail": {
+        "type": "string",
+        "description": "thumbnail image of the video",
+        "format": "uri"
+      },
+      "duration": {
+        "type": "number",
+        "description": "duration of the video in seconds"
+      },
+      "source": {
+        "type": "string",
+        "description": "source of the video (ie. youtube, vimeo, local)"
+      }
+    }
+  });
 
   return {
     name: moduleName,
@@ -16,7 +55,7 @@ remoteStorage.defineModule('videos', function(privateClient, publicClient) {
       "text video#description": "description of the video",
       "string video#thumbnail": "thumbnail image of the video",
       "int video#duration": "duration of the video in seconds",
-      "string video#source": "source of video (ie. youtube, vimeo, local)",
+      "string video#source": "source of video (ie. youtube, vimeo, local)"
     },
 
     exports: {
@@ -56,3 +95,5 @@ remoteStorage.defineModule('videos', function(privateClient, publicClient) {
     }
   };
 });
+if(!module) var module={};
+module.exports = videos;
