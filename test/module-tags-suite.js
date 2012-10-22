@@ -45,15 +45,15 @@ suites.push({
     },
     tests: [
         {
-            desc: "tag module has getTags function",
+            desc: "tag module has getAllTags function",
             run: function(env) {
-                this.assertType(env.tagModule.getTags, 'function');
+                this.assertType(env.tagModule.getAllTags, 'function');
             }
         },
         {
             desc: "getTags should return our preset list of tag names",
             run: function(env) {
-                var d = env.tagModule.getTags();
+                var d = env.tagModule.getAllTags();
                 this.assert(d, env.presets.getTags);
             }
         },

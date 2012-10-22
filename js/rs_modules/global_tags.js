@@ -95,7 +95,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
          * @param {array}   recordIds - list of record IDs
          */
         pub.addTagged = function(tagName, recordIds) {
-          console.log('TAGS: addTagged('+tagName+'/'+_.docType+'):',recordIds);
+          //console.log('TAGS: addTagged('+tagName+'/'+_.docType+'):',recordIds);
           recordIds = _.ensureArray(recordIds);
 
           tagName = tagName.replace(/\s+$/g, ''); // no whitespace at end of string
@@ -117,7 +117,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
          * @params {array}  tagNames -list og tag names
          */
         pub.addTagsToRecord = function(recordId, tagNames) {
-          console.log('TAGS: addTagsToRecord: ', tagNames);
+          //console.log('TAGS: addTagsToRecord: ', tagNames);
           tagNames = _.ensureArray(tagNames);
           var num_tagNames = tagNames.length;
           for (var i = 0; i < num_tagNames; i++) {
@@ -131,7 +131,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
          * @param {array|string} id(s) of record to remove from list
          */
         pub.removeTagged = function(tagName, recordIds) {
-          console.log('TAGS: removeTagged('+tagName+', '+recordIds+')');
+          //console.log('TAGS: removeTagged('+tagName+', '+recordIds+')');
           recordIds = _.ensureArray(recordIds);
 
           // get object for this tag
@@ -149,7 +149,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
             }
           }
           _.removeTagFromReverse(recordIds, tagName);
-          console.log('new id list:'+existingIds);
+          //console.log('new id list:'+existingIds);
           privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, existingIds);
         };
 
