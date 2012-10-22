@@ -4,6 +4,14 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
   privateClient.use('');
   publicClient.use('');
 
+  /*privateClient.declareType('tag', {
+      "description": "a method of tracking tags and references to the module records that they've been related to",
+      "type": "object",
+      "properties": {
+
+      }
+  });*/
+
   return {
     name: moduleName,
 
@@ -21,10 +29,10 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
         pub.on = privateClient.on;
 
         /**
-         * get list of existing tags
+         * get list of all tags of any docType
          * @returns {array}
          */
-        pub.getTags = function() {
+        pub.getAllTags = function() {
           //console.log('TAGS: getTags()');
           var tags = privateClient.getListing('names/');
           var num_tags = tags.length;
@@ -34,6 +42,22 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
           }
           return r_tags;
         };
+
+        /**
+         * get list of existing tags already used for this doctype
+         * @returns {array}
+         */
+        /*pub.getUsedTags = function() {
+          //console.log('TAGS: getTags()');
+          var tags = privateClient.getListing('names/');
+          var num_tags = tags.length;
+          var r_tags = [];
+          for (var i = 0; i < num_tags; i++) {
+            console.log('*****'+tags[i]);
+            r_tags.push(tags[i].replace(/\//g,""));
+          }
+          return r_tags;
+        };*/
 
         /**
          * get a list of all tags which have a specified record ID
@@ -51,7 +75,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
         };
 
         /**
-         * get list of record IDs for this app which have the tag specified.
+         * get list of record IDs for this docType which have the tag specified.
          * @param {string} tagName - the name of the tag
          * @returns {array}
          */
@@ -107,7 +131,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
          * @param {array|string} id(s) of record to remove from list
          */
         pub.removeTagged = function(tagName, recordIds) {
-          //console.log('TAGS: removeTagged('+tagName+', '+recordIds+')');
+          console.log('TAGS: removeTagged('+tagName+', '+recordIds+')');
           recordIds = _.ensureArray(recordIds);
 
           // get object for this tag
@@ -125,6 +149,7 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
             }
           }
           _.removeTagFromReverse(recordIds, tagName);
+          console.log('new id list:'+existingIds);
           privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, existingIds);
         };
 
@@ -221,6 +246,8 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
         _.ensureArray = function(recordIds) {
           if (typeof recordIds === 'string') {
             recordIds = [recordIds];
+          } else if (recordIds === undefined) {
+            recordIds = [];
           }
           return recordIds;
         };

@@ -295,10 +295,35 @@ article div.video_embed {
 article.new_vidmark div.video_embed {
     margin: 20px auto auto 10px;
 }
-article.saved {
+.saved {
     background-color: #EEFFEE !important;
 }
-article div.video_details {
+
+.removed {
+    background-color: #FFAFAE !important;
+}
+
+.video_controls {
+    float:right;
+    margin-right: 20px;
+}
+.delete {
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    -o-border-radius: 12px;
+    -icab-border-radius: 12px;
+    -khtml-border-radius: 12px;
+    border-radius: 12px;
+    background-color: #FFEAEA;
+    padding: 5px;
+    text-decoration: none;
+    font-weight: 900;
+    color: black;
+}
+a.delete:hover {
+    background-color: #FFCACA;
+}
+.video_details {
     margin: auto;
     float: left;
     min-width: 400px;
