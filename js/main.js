@@ -123,13 +123,14 @@ net.silverbucket.vidmarks.appLogic = function() {
                 var id = $(this).parent().parent().attr('id');
                 console.log('ENTER was pressed tag field ['+id+']');
                 var tag_list = _.getInputTags(id);
-                _.db.addTagsToRecord(id, tag_list, function(){_.updateTagStatus(id, 'tags updated!');});
+                _.db.updateTagsForRecord(id, tag_list, function(){_.updateTagStatus(id, 'tags updated!');});
                 pub.displayTagList(); // update tags list
                 e.preventDefault();
                 return false;
             }
         });
 
+        // delete button
         $("section#vidmarks").on('click', 'a.delete', function(e) {
             var id = $(this).parent().parent().attr('id');
             //console.log('id:'+id+' wants to be deleteded');
@@ -137,6 +138,14 @@ net.silverbucket.vidmarks.appLogic = function() {
             return false;
         });
 
+        // auto tag suggestions
+        var timer;
+        $("section#vidmarks").on('keyup', 'input.tag_list', function(e) {
+            clearTimeout(timer);
+            var id = $(this).parent().parent().attr('id');
+            var currentTags = _.getInputTags(id);
+            timer = setTimeout(_.getTagSuggestions(currentTags[currentTags.length - 1]), 300);
+        });
         /* */
 
         pub.displayTagList();
@@ -303,6 +312,20 @@ net.silverbucket.vidmarks.appLogic = function() {
             tags.push(' ');
         }
         return tags.join(', ');
+    };
+    _.getTagSuggestions = function(word) {
+        console.log('getSuggestions for '+word);
+        var tags = _.db.getAllTags();
+        var reg = new RegExp("^"+word+"\\w*");
+        var suggestions = [];
+        var numTags = tags.length;
+        for (var i = 0; i < numTags; i++) {
+            if (reg.test(tags[i])) {
+                suggestions.push(tags[i]);
+            }
+        }
+        console.log('- suggestions: ', suggestions);
+        return suggestions;
     };
 
     /*

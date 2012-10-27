@@ -315,13 +315,19 @@ article.new_vidmark div.video_embed {
     -khtml-border-radius: 12px;
     border-radius: 12px;
     background-color: #FFEAEA;
-    padding: 5px;
+    padding: 2px 5px 2px 5px;
     text-decoration: none;
     font-weight: 900;
     color: black;
+    -moz-box-shadow: -2px 2px #888;
+    -webkit-box-shadow: -2px 2px #888;
+    box-shadow: -2px 2px #888;
 }
 a.delete:hover {
     background-color: #FFCACA;
+    -moz-box-shadow: -2px 2px 5px #888;
+    -webkit-box-shadow: -2px 2px 5px #888;
+    box-shadow: -2px 2px 5px #888;
 }
 .video_details {
     margin: auto;

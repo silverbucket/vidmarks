@@ -77,7 +77,7 @@ net.silverbucket.vidmarks.dbModel = function() {
     };
 
     pub.getAllTags = function() {
-        return _.modules.tags.getTags();
+        return _.modules.tags.getAllTags();
     };
 
     pub.getUsedTags = function() {
@@ -122,6 +122,11 @@ net.silverbucket.vidmarks.dbModel = function() {
 
     pub.addTagsToRecord = function(recordId, tagNames, completedFunc) {
         _.modules.tags.addTagsToRecord(recordId, tagNames);
+        completedFunc();
+    };
+
+    pub.updateTagsForRecord = function(recordId, tagNames, completedFunc) {
+        _.modules.tags.updateTagsForRecord(recordId, tagNames);
         completedFunc();
     };
 

@@ -4,13 +4,23 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
   privateClient.use('');
   publicClient.use('');
 
-  /*privateClient.declareType('tag', {
+  privateClient.declareType('tag', {
       "description": "a method of tracking tags and references to the module records that they've been related to",
-      "type": "object",
-      "properties": {
-
+      "type":"array",
+      "items": {
+        "title": "a collection of record id's associated with this tag name + docType",
+        "type": "string"
       }
-  });*/
+  });
+
+  privateClient.declareType('reverse', {
+      "description": "a method of tracking tags and references to the module records that they've been related to",
+      "type":"array",
+      "items": {
+        "title": "a collection of tags names associated with this record ID + docType",
+        "type": "string"
+      }
+  });
 
   return {
     name: moduleName,
@@ -112,13 +122,28 @@ var global_tags = remoteStorage.defineModule('tags', function(privateClient, pub
         };
 
         /**
-         * sets a list of tags for an id
+         * adds a list of tags for an id
          * @params {string} recordId - record ID
          * @params {array}  tagNames -list og tag names
          */
         pub.addTagsToRecord = function(recordId, tagNames) {
           //console.log('TAGS: addTagsToRecord: ', tagNames);
           tagNames = _.ensureArray(tagNames);
+          var num_tagNames = tagNames.length;
+          for (var i = 0; i < num_tagNames; i++) {
+            pub.addTagged(tagNames[i], recordId);
+          }
+        };
+
+        /**
+         * sets a list of tags for an id, overwriting the old ones
+         * @params {string} recordId - record ID
+         * @params {array}  tagNames -list og tag names
+         */
+        pub.updateTagsForRecord = function(recordId, tagNames) {
+          //console.log('TAGS: addTagsToRecord: ', tagNames);
+          tagNames = _.ensureArray(tagNames);
+          pub.removeRecord(recordId);
           var num_tagNames = tagNames.length;
           for (var i = 0; i < num_tagNames; i++) {
             pub.addTagged(tagNames[i], recordId);
