@@ -129,11 +129,11 @@ define(function(require) {
     // title, visit_url, visit_url (readable), description, thumbnail
     _.templates.display_vidmark = '<div class="video_controls"><a href="#" class="delete">x</a></div>'+
                 '<div class="video_details"><h1>{0}</h1>'+
-                '<a target="_blank" href="{2}">{3}</a>'+
-                '<div class="description"><h3>description</h3><p class="description">{4}</p></div></div>'+
-                '<div class="video_embed"><img src="{5}" alt="thumbnail"/></div>'+
+                '<a target="_blank" href="{1}">{2}</a>'+
+                '<div class="description"><h3>description</h3><p class="description">{3}</p></div></div>'+
+                '<div class="video_embed"><img src="{4}" alt="thumbnail"/></div>'+
                 '<div class="tags"><label name="tag_label" class="tag_label">tags</label>'+
-                '<input class="tag_list" type="text" size="50" name="tags" value="{6}"/>'+
+                '<input class="tag_list" type="text" size="50" name="tags" value="{5}"/>'+
                 '<div class="tags_status"></div></div>';
 
     /*******************************/
@@ -158,7 +158,7 @@ define(function(require) {
                     '<div id="save_status"><a href="#add" class="button stretch" id="add-vidmark">add video</a></div>'+
                     _.string_inject(_.templates.display_vidmark,
                             [details['title'], details['visit_url'], details['visit_url'],
-                            details['description'], details['thumbnail'], tags])+
+                            (details['description']) ? details['description'] : ' ', details['thumbnail'], tags])+
                     '</article>'
                 );
 
@@ -215,7 +215,7 @@ define(function(require) {
             video_list = '<article id="'+id+'" class="vidmark">'+
                 _.string_inject(_.templates.display_vidmark,
                         [list[id]['title'], list[id]['visit_url'], list[id]['visit_url'],
-                        list[id]['description'], list[id]['thumbnail'], tags_formatted])+
+                        (list[id]['description']) ? list[id]['description'] : ' ', list[id]['thumbnail'], tags_formatted])+
                 '</article>' + video_list;
             //console.log('END ['+id+']');
         }
