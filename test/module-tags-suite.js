@@ -1,4 +1,7 @@
-module.exports = function() {
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
+define(['requirejs'], function(requirejs, undefined) {
 var suites = [];
 suites.push({
     name: "tags module",
@@ -35,7 +38,7 @@ suites.push({
         this.assertType(env.remoteStorage.defineModule, 'function');
 
         global.remoteStorage = env.remoteStorage;
-        var moduleImport = require('../js/rs_modules/global_tags.js');
+        var moduleImport = requirejs('./js/rs_modules/global_tags');
         // if we loaded the tag module correctly, it should have returned
         // a function for us to use.
         this.assertTypeAnd(env.moduleImport, 'function');
@@ -134,4 +137,4 @@ suites.push({
     ]
 });
 return suites;
-}();
+});

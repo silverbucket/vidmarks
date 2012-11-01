@@ -1,4 +1,7 @@
-module.exports = function() {
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
+define(['requirejs'], function(requirejs, undefined) {
 var suites = [];
 suites.push({
     name: "videos module",
@@ -35,7 +38,7 @@ suites.push({
         this.assertType(env.remoteStorage.defineModule, 'function');
 
         global.remoteStorage = env.remoteStorage;
-        var moduleImport = require('../js/rs_modules/videos.js');
+        var moduleImport = requirejs('./js/rs_modules/videos.js');
         // if we loaded the tag module correctly, it should have returned
         // a function for us to use.
         console.log(env.moduleImport);
@@ -96,7 +99,7 @@ suites.push({
         },
         {
             desc: "lets add a record with an invalid schema",
-            assertFail: true,
+            willFail: true,
             run: function(env) {
                 var new_record = {
                     'title': 'dogs and bacon',
@@ -110,7 +113,7 @@ suites.push({
                 };
 
                 env.vidModule.on('error', function(err) {
-                    console.log('DB ERROR: videos - '+err);
+                    console.log('DB ERROR: videos (teste) - '+err);
                 });
 
                 var id = env.vidModule.add(new_record, '098765');
@@ -120,8 +123,9 @@ suites.push({
             }
         }
     ],
-    takedown: function() {
+    takedown: function(env) {
         delete global.remoteStorage;
+        env.vidModule.on('error', function(err) {});
         this.result(true);
     }
 });
@@ -139,4 +143,4 @@ suites.push({
     ]
 });
 return suites;
-}();
+});

@@ -1,13 +1,9 @@
-if(!net) var net={};
-if(!net.silverbucket) net.silverbucket={};
-
-
 /**
  * videoSiteAPI - provides an abstraction interface to the various video site APIs
  *
  * requires: jquery, and jsuri
  */
-net.silverbucket.videoSiteAPI = function(window, undefined) {
+define(['jsuri'], function(jsuri, undefined) {
     var pub = {};
     var _ = {};
 
@@ -87,4 +83,4 @@ net.silverbucket.videoSiteAPI = function(window, undefined) {
     };
 
     return pub;
-}(this);
+});
