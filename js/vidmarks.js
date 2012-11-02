@@ -61,6 +61,16 @@ define(function(require) {
                 }
             }, 100);
         });
+        $("#submit_url_form_area").on('keypress', 'input#input_vid_url', function (e) {
+            if (e.which == 13) {
+                var url = $(this).val();
+                if (!_.vidAPI.retrieveDetails(url, pub.displayNewVidmark, pub.displayErrorVidmark)) {
+                    pub.displayMessage(_.vidAPI.getErrorMessage(), 'error');
+                }
+                return false;
+            }
+        });
+
 
         $("form#submit_url_form").validate({
             //set the rules for the field names
@@ -153,42 +163,22 @@ define(function(require) {
         }
 
         _.db.setCache('video', details); // cache the details in case of save
+        _.db.addVidmark(record_id);
+        $('#message').html('<p class="success">video saved!</p>');
 
-        $("#vidmarks").prepend('<article id="'+record_id+'" class="new_vidmark vidmark">'+
-                    '<div id="save_status"><a href="#add" class="button stretch" id="add-vidmark">add video</a></div>'+
+
+        $("#vidmarks").prepend('<article id="'+record_id+'" class="vidmark">'+
+                    //'<div class="status"><a href="#add" class="button stretch" id="add_vidmark">add video</a></div>'+
                     _.string_inject(_.templates.display_vidmark,
                             [details['title'], details['visit_url'], details['visit_url'],
                             (details['description']) ? details['description'] : ' ', details['thumbnail'], tags])+
                     '</article>'
                 );
 
-        // add listener for save call
-        $("a#add-vidmark").click(function() {
-            var vidmark_id = $(this).parent().parent().attr('id');
-            console.log('vidmark_id['+vidmark_id+']');
-            $('#save_status').html('<p class="status">saving video</p>');
-            _.db.addVidmark(vidmark_id);
-            $('#save_status').html('<p class="success">video saved! view <a href="#videos" id="quicklink-list">video list</a></p>');
-            $(this).parent().parent().addClass('saved');
-            $("a#quicklink-list").click(function() {
-                _.nav.toggle('list');
-                pub.displayVidmarkList();
-                return false;
-            });
-
-            return false;
-        });
-
-        // when you hit enter in the tag input field, we save the new tags
-        $("article#"+record_id+' input.tag_list').keypress(function (e) {
-            if (e.which == 13) {
-                console.log('ENTER was pressed tag field');
-                var tag_list = _.getInputTags(record_id);
-                _.db.setCache('tags', tag_list);
-                _.updateTagStatus(record_id, 'tags will be saved along with video');
-                e.preventDefault();
-                return false;
-            }
+        $('#message p').fadeOut('slow');
+        //$('#'+record_id).removeClass('new_vidmark');
+        $('#'+record_id).animate({backgroundColor: '#FFEAFF'}, 'slow', function() {
+            $('#'+record_id).animate({backgroundColor: '#FFFFFF'}, 'slow');
         });
     };
 
@@ -260,10 +250,8 @@ define(function(require) {
      */
     _.removeVidmarkEntry = function(id) {
         console.log('removeVidmarkEntry:'+id);
-        $('#'+id).html('<div><p class="removed">entry removed</p></div>')
-            .fadeOut(1000, function() {
-                $('#'+id).remove();
-        });
+        delete _.vidmarks[id];
+        $('#'+id).effect('explode', {}, 500);
     };
     _.updateTagStatus = function(id, message) {
         $('article#'+id+' div.tags_status').html(message);
