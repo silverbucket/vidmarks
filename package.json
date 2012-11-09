@@ -4,6 +4,15 @@
   "private": true,
   "author": "Nick Jennings <nick@silverbucket.net>",
   "license": "GPL",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/silverbucket/vidmarks.git"
+  },
+  "homepage": "http://github.com/silverbucket/vidmarks",
+  "author": {
+    "name": "Nick Jennings",
+    "email": "nick@silverbucket.net"
+  },
   "devDependencies": {
     "teste": "*"
   },
