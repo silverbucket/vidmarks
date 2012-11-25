@@ -3,77 +3,96 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>vidmarks</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>vidmarks</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
 
-        <link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="css/main.css">
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
-        <script src="js/vendor/modernizr-2.6.1.min.js"></script>
-        <link rel="stylesheet" href="js/vendor/fancybox/jquery.fancybox.css?v=2.1.3" type="text/css" media="screen" />
-    </head>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
+    <script src="js/vendor/modernizr-2.6.1.min.js"></script>
+    <link rel="stylesheet" href="js/vendor/fancybox/jquery.fancybox.css?v=2.1.3" type="text/css" media="screen" />
+  </head>
 
-    <body>
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a>!</p>
-        <![endif]-->
+  <body>
+    <!--[if lt IE 7]>
+      <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a>!</p>
+    <![endif]-->
 
-        <div id="content_header">
-            <div id="remotestorage-connect"></div>
+    <div id="content_header">
+      <div id="remotestorage-connect"></div>
 
-            <div id="logo">
-                <img src="img/logo_250x80.png" alt="vidmarks logo" />
-            </div>
+      <div id="logo">
+        <img src="img/logo_250x80.png" alt="vidmarks logo" />
+      </div>
 
-            <section id="submit">
-                <div id="submit_url_form_area">
-                    <form name="submit_url_form" id="submit_url_form">
-                        <div class="label_container"><label for="vid_url">url</label></div>
-                        <input id="input_vid_url" name="vid_url" class="required" value="" size="55"/>
-                        <div class="counter_label_container">&nbsp; <br /></div>
-                    </form>
-                </div>
-            </section>
-            <div id="message"></div>
+      <section id="submit">
+        <div id="submit_url_form_area">
+          <form name="submit_url_form" id="submit_url_form">
+            <div class="label_container"><label for="vid_url">url</label></div>
+            <input id="input_vid_url" name="vid_url" class="required" value="" size="55"/>
+            <div class="counter_label_container">&nbsp; <br /></div>
+          </form>
         </div>
+      </section>
+      <div id="message"></div>
+    </div>
 
 
-        <aside>
-            <div id="tags_box">
-                <h2>tags</h2>
-                <ul id="full_tag_list">
-                </ul>
-            </div>
-        </aside>
+    <aside>
+      <div id="tags_box">
+        <h2>tags</h2>
+        <ul id="full_tag_list">
+        </ul>
+      </div>
+    </aside>
 
 
-        <section id="vidmarks">
+    <section id="vidmarks">
 
-        </section>
+    </section>
 
 
-        <footer>
-        </footer>
+    <footer>
+    </footer>
 
-        <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.2.min.js"></script>
-        <script type="text/javascript" src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
-        <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
 
-        <script src="js/vendor/remoteStorage-0.7.0-rc2.js"></script>
-        <script src="js/vendor/require-2.1.1.min.js" data-main="js/main.js"></script>
-        <script src="js/vendor/fancybox/jquery.fancybox.pack.js?v=2.1.3"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <script>
-            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
-            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-            s.parentNode.insertBefore(g,s)}(document,'script'));
-        </script>
-    </body>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+
+    <script src="js/vendor/remoteStorage-0.7.0-rc2.js"></script>
+    <script src="js/vendor/require-2.1.1.min.js" data-main="js/main.js"></script>
+    <script src="js/vendor/fancybox/jquery.fancybox.pack.js?v=2.1.3"></script>
+    <script src="js/vendor/fancybox/helpers/jquery.fancybox-media.js?v=1.0.0"></script>
+
+    <script type="text/javascript">
+$(document).ready(function() {
+  $(".various").fancybox({
+    maxWidth  : 800,
+    maxHeight : 600,
+    fitToView : true,
+    //width   : '70%',
+    //height    : '90%',
+    autoSize  : true,
+    closeClick  : false,
+    openEffect  : 'fade',
+    closeEffect : 'fade'
+  });
+});
+    </script>
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+      var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+      g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+      s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
 </html>
