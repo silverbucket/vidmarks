@@ -62,6 +62,7 @@ define(function(require) {
         }
       }, 100);
     });
+
     $("#submit_url_form_area").on('keypress',
                                   'input#input_vid_url', function (e) {
       if (e.which == 13) {
@@ -73,7 +74,6 @@ define(function(require) {
         return false;
       }
     });
-
 
     $("form#submit_url_form").validate({
       //set the rules for the field names
@@ -152,7 +152,9 @@ define(function(require) {
         '<a target="_blank" href="{visit_url}">{visit_url}</a>' +
         '<div class="description"><h3>description</h3>' +
         '<p class="description">{description}</p></div></div>'+
-        '<div class="video_embed"><a class="various fancybox.iframe" href="{embed_url}"><img src="{thumbnail}" alt="thumbnail"/></a></div>'+
+        '<div class="video_embed">' +
+        '<a class="various fancybox.iframe" href="{embed_url}">' +
+        '<img src="{thumbnail}" alt="thumbnail"/></a></div>' +
         '<div class="tags">' +
         '<label name="tag_label" class="tag_label">tags</label>' +
         '<input class="tag_list" type="text" size="50" name="tags" ' +
@@ -165,9 +167,9 @@ define(function(require) {
    * present new vidmark data for submition
    */
   pub.displayNewVidmark = function(details) {
-    var record_id = details['source']+'_'+details['vid_id'];
+    var record_id = details['source'] + '_' + details['vid_id'];
     var tags = [' ']; // new entries wont have any tags
-    console.log('displayNewVidmark - vid_id:'+record_id, details);
+    console.log('displayNewVidmark - vid_id:' + record_id, details);
 
     if (_.vidmarks[record_id]) {
       pub.displayMessage('that video already exists!', 'info');
@@ -184,7 +186,8 @@ define(function(require) {
           _.string_inject(_.templates.display_vidmark, {
               title: details['title'],
               visit_url: details['visit_url'],
-              description: (details['description']) ? details['description'] : ' ',
+              description: (details['description']) ?
+                                  details['description'] : ' ',
               embed_url: details['embed_url'],
               thumbnail: details['thumbnail'],
               tags: tags
@@ -222,7 +225,8 @@ define(function(require) {
         _.string_inject(_.templates.display_vidmark, {
             title: list[id]['title'],
             visit_url: list[id]['visit_url'],
-            description: (list[id]['description']) ? list[id]['description'] : ' ',
+            description: (list[id]['description']) ?
+                                list[id]['description'] : ' ',
             embed_url: list[id]['embed_url'],
             thumbnail: list[id]['thumbnail'],
             tags: tags_formatted
@@ -306,23 +310,18 @@ define(function(require) {
   };
 
   /*
-   * basic templating function
-   *
-   * original function dealt with an array of values and replaced the passed
-   * source string in that order. take from:
-   * http://mattsnider.com/template-string-replacement-function/
-   *
-   * later modified to use named properties to replace, no longer replying on
-   * order of values passed.
+   * basic templating function (supplant)
+   * uses keys from iValues and inserts value into string with {<key>} matches
    */
   _.string_inject = function(sSource, iValues) {
-    if (typeof iValues === 'object') {
-      for (var key in iValues) {
-        var regexp = new RegExp('\\{'+key+'\\}', 'gi');
-        sSource = sSource.replace(regexp, iValues[key]);
-      }
+    if ((typeof iValues === 'object') && (iValues)) {
+      return sSource.replace(/\{([^{}]*)\}/g, function(a, b) {
+        var r = iValues[b];
+        return typeof r === 'string' ? r : a;
+      });
+    } else {
+      return sSource;
     }
-    return sSource;
   };
 
   return pub;
