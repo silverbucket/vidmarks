@@ -168,7 +168,6 @@ define(function(require) {
    */
   pub.displayNewVidmark = function(details) {
     var record_id = details['source'] + '_' + details['vid_id'];
-    var tags = [' ']; // new entries wont have any tags
     console.log('displayNewVidmark - vid_id:' + record_id, details);
 
     if (_.vidmarks[record_id]) {
@@ -190,7 +189,7 @@ define(function(require) {
                                   details['description'] : ' ',
               embed_url: details['embed_url'],
               thumbnail: details['thumbnail'],
-              tags: tags
+              tags: ''
             }) + '</article>'
         );
 
