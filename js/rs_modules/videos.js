@@ -43,13 +43,14 @@ define(function() {
           "type": "string",
           "description": "source of the video (ie. youtube, vimeo, local)"
         },
-        "data_type": {
+        "content_type": {
           "type": "string",
           "description": "the mimetype ie. application/x-shockwave-flash"
         },
-        "data": {
+        "video_data": {
           "type": "binary",
-          "description": "actual binary video data"
+          "description": "actual binary video data",
+          "required": false
         }
       }
     });
@@ -68,7 +69,7 @@ define(function() {
         "string video#thumbnail": "thumbnail image of the video",
         "int video#duration": "duration of the video in seconds",
         "string video#source": "source of video (ie. youtube, vimeo, local)",
-        "string video#data_type": "the mimetype ie. application/x-shockwave-flash",
+        "string video#content_type": "the mimetype ie. application/x-shockwave-flash",
         "binary video#data": "actual binary video data"
       },
 
@@ -84,7 +85,6 @@ define(function() {
         //   }
         // });
         on: privateClient.on,
-
 
         getIds: function() {
           return privateClient.getListing('');
