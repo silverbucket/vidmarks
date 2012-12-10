@@ -116,6 +116,17 @@ suites.push({
                 var d = env.tagModule.getTagsByRecord('12345');
                 this.assert(d, []);
             }
+        },
+        {
+            desc: "addTagsToRecord and create a new tagname with a space in it",
+            run: function(env) {
+                env.tagModule.addTagsToRecord(['67890'], ['travel', 'hello world']);
+                var d = env.tagModule.getTagsByRecord('67890');
+                env.presets.getTagsByRecord.push('hello world');
+                console.log(env.presets.getTagsByRecord);
+                console.log(d);
+                this.assert(d, env.presets.getTagsByRecord);
+            }
         }
     ],
     takedown: function() {
