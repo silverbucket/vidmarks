@@ -1,0 +1,14 @@
+
+remoteStorage.defineModule('messages', function(base) {
+
+  var messages = {
+
+    
+
+  };
+
+  return {
+    exports: messages;
+  };
+
+});
