@@ -1,7 +1,7 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-define(function() {
+define(['remotestorage/remoteStorage'], function(remoteStorage) {
   var videos = remoteStorage.defineModule('videos', function(privateClient, publicClient) {
     var moduleName = 'videos';
     privateClient.use('');
