@@ -223,7 +223,7 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
                       updatedTags.push(existingTags[j]);
                     }
                   }
-                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], updatedTags);                  
+                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], updatedTags);
                 });
             });
           };
