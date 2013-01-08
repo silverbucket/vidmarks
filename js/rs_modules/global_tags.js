@@ -1,7 +1,11 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-define(function() {
+define(['remotestorage/remoteStorage'], function(remoteStorage) {
+
+  var curry = remoteStorage.util.curry;
+  var asyncEach = remoteStorage.util.asyncEach;
+
   var global_tags = remoteStorage.defineModule('tags', function(privateClient, publicClient) {
     //"use strict";
     var moduleName = 'tags';
@@ -48,13 +52,15 @@ define(function() {
            */
           pub.getAllTags = function() {
             //console.log('TAGS: getTags()');
-            var tags = privateClient.getListing('names/');
-            var num_tags = tags.length;
-            var r_tags = [];
-            for (var i = 0; i < num_tags; i++) {
-              r_tags.push(tags[i].replace(/\//g,""));
-            }
-            return r_tags;
+            return privateClient.getListing('names/').
+              then(function(tags) {
+                var num_tags = tags.length;
+                var r_tags = [];
+                for (var i = 0; i < num_tags; i++) {
+                  r_tags.push(tags[i].replace(/\//g,""));
+                }
+                return r_tags;
+              });
           };
 
           /**
@@ -81,11 +87,13 @@ define(function() {
           pub.getTagsByRecord = function(recordId) {
             //console.log("TAGS: getTagsByRecord("+recordId+")");
             var return_val = [];
-            var val = privateClient.getObject('reverse/'+_.docType+'/'+recordId);
-            if (typeof val === "object") {
-              return_val = val;
-            }
-            return return_val;
+            return privateClient.getObject('reverse/'+_.docType+'/'+recordId).
+              then(function(obj) {
+                if (typeof obj === "object") {
+                  return_val = obj;
+                }
+                return return_val;
+              });
           };
 
           /**
@@ -95,12 +103,14 @@ define(function() {
            */
           pub.getTagged = function(tagName) {
             //console.log('TAGS: getTagged('+tagName+'/'+_.docType+')');
-            var return_val = [];
-            var val = privateClient.getObject('names/'+tagName+'/'+_.docType);
-            if (typeof val === "object") {
-              return_val = val;
-            }
-            return return_val;
+            return privateClient.getObject('names/'+tagName+'/'+_.docType).
+              then(function(obj) {
+                var return_val = [];
+                if (typeof obj === "object") {
+                  return_val = obj;
+                }
+                return return_val;
+              });
           };
 
           /**
@@ -122,7 +132,7 @@ define(function() {
             var unique_obj = _.mergeAndUnique(existingIds, recordIds);
 
             _.addReverse(tagName, recordIds); // add ids to tags reverse lookup document
-            privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, unique_obj);
+            return privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, unique_obj);
           };
 
           /**
@@ -132,11 +142,10 @@ define(function() {
            */
           pub.addTagsToRecord = function(recordId, tagNames) {
             //console.log('TAGS: addTagsToRecord: ', tagNames);
-            tagNames = _.ensureArray(tagNames);
-            var num_tagNames = tagNames.length;
-            for (var i = 0; i < num_tagNames; i++) {
-              pub.addTagged(tagNames[i], recordId);
-            }
+
+            return asyncEach(_.ensureArray(tagNames), function(tagName) {
+              return pub.addTagged(tagName, recordId);
+            });
           };
 
           /**
@@ -146,12 +155,8 @@ define(function() {
            */
           pub.updateTagsForRecord = function(recordId, tagNames) {
             //console.log('TAGS: addTagsToRecord: ', tagNames);
-            tagNames = _.ensureArray(tagNames);
-            pub.removeRecord(recordId);
-            var num_tagNames = tagNames.length;
-            for (var i = 0; i < num_tagNames; i++) {
-              pub.addTagged(tagNames[i], recordId);
-            }
+            return pub.removeRecord(recordId).
+              then(curry(pub.addTagsToRecord, recordId, tagNames));
           };
 
           /**
@@ -164,22 +169,23 @@ define(function() {
             recordIds = _.ensureArray(recordIds);
 
             // get object for this tag
-            var existingIds = pub.getTagged(tagName);
+            return pub.getTagged(tagName).
+              then(function(existingIds) {
 
-            // remove all occurences of appId(s) from existingIds list
-            var num_recordIds = recordIds.length;
-            for (var i = 0; i < num_recordIds; i++) {
-              var num_existingIds = existingIds.length;
-              for (var j = 0; j < num_existingIds; j++) {
-                if (recordIds[i] === existingIds[j]) {
-                  existingIds.splice(j, 1);
-                  break;
+                // remove all occurences of appId(s) from existingIds list
+                var num_recordIds = recordIds.length;
+                for (var i = 0; i < num_recordIds; i++) {
+                  var num_existingIds = existingIds.length;
+                  for (var j = 0; j < num_existingIds; j++) {
+                    if (recordIds[i] === existingIds[j]) {
+                      existingIds.splice(j, 1);
+                      break;
+                    }
+                  }
                 }
-              }
-            }
-            _.removeTagFromReverse(recordIds, tagName);
-            //console.log('new id list:'+existingIds);
-            privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, existingIds);
+                return _.removeTagFromReverse(recordIds, tagName).
+                  then(curry(privateClient.storeObject, 'tag', 'names/'+tagName+'/'+_.docType, existingIds));
+              });
           };
 
           /**
@@ -188,11 +194,12 @@ define(function() {
            */
           pub.removeRecord = function(recordId) {
             //console.log('TAGS: removeRecord()');
-            var tagList = pub.getTagsByRecord(recordId);
-            var num_tagList = tagList.length;
-            for (var i = 0; i < num_tagList; i++) {
-              pub.removeTagged(tagList[i], recordId);
-            }
+            return pub.getTagsByRecord(recordId).
+              then(function(tagList) {
+                return asyncEach(tagList, function(tag) {
+                  return pub.removeTagged(tag, recordId);
+                });
+              });
           };
 
           /**
@@ -204,21 +211,21 @@ define(function() {
             //console.log('TAG: _removeTagFromReverse('+recordIds+', '+tagName+')');
             recordIds = _.ensureArray(recordIds);
 
-            var num_recordIds = recordIds.length;
-            for (var i = 0; i < num_recordIds; i++) {
-              // foreach record Id, remove all tags in it's obj
-              var existingTags = pub.getTagsByRecord(recordIds[i]);
-              var num_existingTags = existingTags.length;
-              var updatedTags = [];
-              for (var j = 0; j < num_existingTags; j++) {
-                if (existingTags[j] === tagName) {
-                  continue;
-                } else {
-                  updatedTags.push(existingTags[j]);
-                }
-              }
-              privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], updatedTags);
-            }
+            return asyncEach(recordIds, function(recordId) {
+              return pub.getTagsByRecordId(recordId).
+                then(function(existingTags) {
+                  var num_existingTags = existingTags.length;
+                  var updatedTags = [];
+                  for (var j = 0; j < num_existingTags; j++) {
+                    if (existingTags[j] === tagName) {
+                      continue;
+                    } else {
+                      updatedTags.push(existingTags[j]);
+                    }
+                  }
+                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], updatedTags);                  
+                });
+            });
           };
 
           /**
@@ -231,19 +238,17 @@ define(function() {
             tagNames = _.ensureArray(tagNames);
             recordIds = _.ensureArray(recordIds);
 
-            var num_recordIds = recordIds.length;
-            for (var i = 0; i < num_recordIds; i++) {
-              //console.log('****: _addReverse() - getting object');
-              var existingTags = privateClient.getObject('reverse/'+_.docType+'/'+recordIds[i]);
-              //console.log('****: _addReverse() - getting object finished');
-              if (!existingTags) {
-                existingTags = [];
-              }
-
-              var uniqueTagNames = _.mergeAndUnique(existingTags, tagNames);
-              //console.log('STORING: reverse/'+_.docType+'/'+recordIds[i], uniqueTagNames);
-              privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], uniqueTagNames);
-            }
+            return asyncEach(recordIds, function(recordId) {
+              return privateClient.getObject('reverse/'+_.docType+'/'+recordId).
+                then(function(existingTags) {
+                  if(! existingTags) {
+                    existingTags = [];
+                  }
+                  var uniqueTagNames = _.mergeAndUnique(existingTags, tagNames);
+                  //console.log('STORING: reverse/'+_.docType+'/'+recordIds[i], uniqueTagNames);
+                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], uniqueTagNames);
+                });
+            });
           };
 
           /**

@@ -1,0 +1,13 @@
+
+define(['../remoteStorage'], function(remoteStorage) {
+
+  var moduleName = 'bookmarks';
+
+  remoteStorage.defineModule(
+    moduleName,
+    function(privateClient, publicClient) {
+      
+    }
+  );
+
+});

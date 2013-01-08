@@ -1,0 +1,12 @@
+define(['./store'], function(store) {
+  return {
+    ls: function(path) {
+      store.getNode(path).
+        then(function(node) {
+          Object.keys(node).forEach(function(key) {
+            console.log(" - " + key)
+          });
+        });
+    }
+  }
+});

@@ -1,0 +1,119 @@
+
+define([
+  '../util',
+  './common',
+  './pending'
+], function(util, common, pendingAdapter) {
+
+  var logger = util.getLogger('store::websql');
+
+  var DB_NAME = 'remotestorage';
+  var DB_VERSION = '1.0';
+  var DB_HINT = 'remoteStorage.js local cache';
+  // FIXME: resize as needed?
+  var DB_SIZE = 50*1024*1024;
+
+  var adapter = function() {
+
+    var DB;
+
+    if(typeof(window) === 'undefined' ||
+       typeof(window.openDatabase) !== 'function') {
+      throw new Error("Not supported: window.openDatabase not found");
+    }
+
+    function openDatabase() {
+      return util.makePromise(function(promise) {
+        logger.info('Opening database...');
+        DB = window.openDatabase(
+          DB_NAME, DB_VERSION, DB_HINT, DB_SIZE,
+          function(_db) {
+            logger.info('database creation cb', _db);
+            _db.changeVersion('', '1.0', function(transaction) {
+              logger.info('change-version transaction', transaction);
+              transaction.executeSql('CREATE TABLE nodes (key, meta, data)');
+            }, util.bind(promise.fail, promise));
+          });
+        if(tempAdapter.replaceWith) {
+          logger.info("FLUSHING!");
+          tempAdapter.replaceWith(webSqlStore);
+        }
+        logger.info("Database opened.", DB);
+        promise.fulfill();
+      });
+    }
+
+    function sqlString(string) {
+      return '"' + string.replace('"', '\\"') + '"';
+    }
+
+    function executeSql(rw, query) {
+      var vars = Array.prototype.slice.call(arguments, 2);
+      return util.makePromise(function(promise) {
+        query = query.replace(/\?/g, function() {
+          if(vars.length > 0) {
+            return sqlString(vars.shift());
+          } else {
+            throw new Error("Missing replacement variable in query: " + query);
+          }
+        });
+        DB[rw ? 'transaction' : 'readTransaction'](function(transaction) {
+          transaction.executeSql(query);
+        }, util.bind(promise.fail, promise), util.bind(promise.fulfill, promise));
+      });
+    }
+
+    var executeRead = util.curry(executeSql, false);
+    var executeWrite = util.curry(executeSql, true);
+
+    var tempAdapter = pendingAdapter();
+
+    var webSqlStore = {
+      on: function(eventName, handler) {
+        logger.debug("WARNING: webSQL event handling not implemented");
+      },
+      get: function(key) {
+        logger.debug('GET', key);
+        return executeRead('SELECT * FROM nodes WHERE key = ? LIMIT 1', key).
+          then(function(result) {
+            if(result.rows.length > 0) {
+              var row = resuts.rows[0];
+              var node = JSON.parse(row.meta);
+              node.data = row.data;
+              return common.unpackData(node);
+            }
+          });
+      },
+      set: function(key, value) {
+        logger.debug('SET', key);
+        var node = common.packData(value);
+        var data = node.data;
+        delete node.data;
+        return webSqlStore.get(key).
+          then(function(result) {
+            return executeWrite(
+              ( result ?
+                'UPDATE nodes SET meta = ?, data = ? WHERE key = ?' :
+                'INSERT INTO nodes (meta, data, , key) VALUES (?, ?, ?)' ),
+              JSON.stringify(node), data, key
+            );
+          });
+      },
+      remove: function(key) {
+        logger.debug('REMOVE', key);
+        return executeWrite('DELETE FROM nodes WHERE key = ?', key);
+      },
+      forgetAll: function() {
+        logger.debug('FORGET ALL');
+        return executeWrite('DELETE FROM nodes');
+      }
+    };
+
+      openDatabase().onerror = function() {
+      };
+
+    return tempAdapter;
+  };
+
+  return adapter;
+});

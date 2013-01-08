@@ -1,0 +1,6 @@
+
+remoteStorage.defineModule('buddyradar', function(privateClient, publicClient) {
+
+
+
+});

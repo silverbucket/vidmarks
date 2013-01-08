@@ -3,7 +3,7 @@
  *
  * requires: remoteStorage.js
  */
-define(['rs_modules/global_tags', 'rs_modules/videos'], function(global_tags, videos) {
+define(['remotestorage/remoteStorage', 'rs_modules/global_tags', 'rs_modules/videos'], function(remoteStorage, global_tags, videos) {
   var pub = {}; // public variable and functions container
   var _ = {}; // private variable and functions container
 
@@ -15,9 +15,13 @@ define(['rs_modules/global_tags', 'rs_modules/videos'], function(global_tags, vi
   pub.init = function() {
     console.log('- DB: init()');
     //remoteStorage.util.setLogLevel('debug');
-    remoteStorage.claimAccess('videos', 'rw');
-    remoteStorage.claimAccess('tags', 'rw');
-    remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
+    remoteStorage.claimAccess({ 'videos': 'rw', 'tags': 'rw' }).
+      then(function() {
+        remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
+
+        // FOR DEBUGGING:
+        remoteStorage.schedule.disable();
+      });
 
     _.modules.videos    = remoteStorage.videos;
     _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
