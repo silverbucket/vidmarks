@@ -1,7 +1,11 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-define(['remotestorage/remoteStorage'], function(remoteStorage) {
+define(['rs'], function(remoteStorage) {
+
+  var curry = remoteStorage.util.curry;
+  var asyncEach = remoteStorage.util.asyncEach;
+
   var videos = remoteStorage.defineModule('videos', function(privateClient, publicClient) {
     var moduleName = 'videos';
     privateClient.use('');
@@ -38,7 +42,7 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
         "duration": {
           "type": "number",
           "description": "duration of the video in seconds"
-        },
+          },
         "source": {
           "type": "string",
           "description": "source of the video (ie. youtube, vimeo, local)"
@@ -98,8 +102,8 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
           if (!id) {
             id = privateClient.getUuid();
           }
-          var status = privateClient.storeObject('video', id, details);
-          return id;
+          return privateClient.storeObject('video', id, details).
+            then(function() { return id; });
         },
 
         remove: function(id) {
@@ -111,3 +115,4 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
   });
   return videos;
 });
+

@@ -1,89 +1,199 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-define(['requirejs'], function(requirejs, undefined) {
+require.config({
+  paths: {
+    rs: 'vendor/remoteStorage/src',
+    rs_base: 'vendor/remoteStorage'
+  }
+});
+define(['js/rs_modules/global_tags'], function(moduleImport, undefined) {
 var suites = [];
 suites.push({
-    name: "tags module",
-    desc: "collections of tests for the global_tags.js module",
-    setup: function(env) {
-        env.presets = {};
-        // a sample data set which should properly represet the way remoteStorage
-        // data is stored.
-        env.remoteStorage = new this.Stub.mock.remoteStorage({
-            'names/dog' : {},
-            'names/dog/videos': [ '12345', '67890', 'abcde', 'fghij' ],
-            'names/cat': {},
-            'names/cat/videos': [ '34567', 'abcde' ],
-            'names/horse': {},
-            'names/horse/videos': [ '12345', 'fghij', '67890' ],
-            'names/aardvark': {},
-            'names/aardvark/videos': [ '34567', 'defgh' ],
-            'reverse/videos': {},
-            'reverse/videos/12345': ['horse', 'dog'],
-            'reverse/videos/67890': ['horse', 'dog'],
-            'reverse/videos/abcde': ['cat', 'dog'],
-            'reverse/videos/fghij': ['horse', 'dog'],
-            'reverse/videos/34567': ['cat', 'aardvark'],
-            'reverse/videos/defgh': ['aardvark']
-        });
-        // the expected restults from the various module functions called
-        env.presets.docType = 'videos';
-        env.presets.getTags = ['dog', 'cat', 'horse', 'aardvark'];
-        env.presets.getTagsByRecord = ['dog', 'horse'];
-        env.presets.getTagged = ['34567', 'defgh'];
+  name: "tags module",
+  desc: "collections of tests for the global_tags.js module",
+  setup: function(env, test) {
+    requirejs([
+      'rs/lib/util',
+      'rs/remoteStorage',
+      'rs/lib/store',
+      'rs/lib/sync',
+      'rs/modules/root',
+      'rs_base/test/helper/server',
+      'rs_base/server/nodejs-example'
+    ], function(_util, remoteStorage, store, sync, root, serverHelper, nodejsExampleServer) {
+      util = _util;
+      curry = util.curry;
+      env.remoteStorage = remoteStorage;
+      env.store = store;
+      env.sync = sync;
+      env.client = root;
 
-        this.assertTypeAnd(env.remoteStorage, 'function');
-        this.assertTypeAnd(env.remoteStorage.baseClient, 'function');
-        this.assertType(env.remoteStorage.defineModule, 'function');
 
-        global.remoteStorage = env.remoteStorage;
-        var moduleImport = requirejs('./js/rs_modules/global_tags');
-        // if we loaded the tag module correctly, it should have returned
-        // a function for us to use.
-        this.assertTypeAnd(env.moduleImport, 'function');
-        var tagModule_exports = moduleImport[1](env.remoteStorage.baseClient, env.remoteStorage.baseClient).exports;
-        env.tagModule = tagModule_exports.getPrivateListing('videos');
-        this.assertType(env.tagModule, 'object');
+      // if we loaded the tag module correctly, it should have returned
+      // a function for us to use.
+      test.assertTypeAnd(moduleImport, 'object');
+      test.assertTypeAnd(moduleImport.getPrivateListing, 'function');
+      env.tagModule = moduleImport.getPrivateListing('videos');
+      test.assertTypeAnd(env.tagModule, 'object');
+
+
+      console.log('serverHelper:',serverHelper);
+      env.serverHelper = serverHelper;
+      util.extend(env.serverHelper, nodejsExampleServer.server);
+      env.serverHelper.disableLogs();
+      env.serverHelper.start(curry(test.result.bind(test), true));
+    });
+
+
+    /*  env.presets = {};
+      // a sample data set which should properly represet the way remoteStorage
+      // data is stored.
+      env.remoteStorage = new this.Stub.mock.remoteStorage({
+          'names/dog' : {},
+          'names/dog/videos': [ '12345', '67890', 'abcde', 'fghij' ],
+          'names/cat': {},
+          'names/cat/videos': [ '34567', 'abcde' ],
+          'names/horse': {},
+          'names/horse/videos': [ '12345', 'fghij', '67890' ],
+          'names/aardvark': {},
+          'names/aardvark/videos': [ '34567', 'defgh' ],
+          'reverse/videos': {},
+          'reverse/videos/12345': ['horse', 'dog'],
+          'reverse/videos/67890': ['horse', 'dog'],
+          'reverse/videos/abcde': ['cat', 'dog'],
+          'reverse/videos/fghij': ['horse', 'dog'],
+          'reverse/videos/34567': ['cat', 'aardvark'],
+          'reverse/videos/defgh': ['aardvark']
+      });
+      // the expected restults from the various module functions called
+      env.presets.docType = 'videos';
+      env.presets.getTags = ['dog', 'cat', 'horse', 'aardvark'];
+      env.presets.getTagsByRecord = ['dog', 'horse'];
+      env.presets.getTagged = ['34567', 'defgh'];
+
+      this.assertTypeAnd(env.remoteStorage, 'object');
+      this.assertTypeAnd(env.remoteStorage.baseClient, 'function');
+      this.assertType(env.remoteStorage.defineModule, 'function');
+
+      global.remoteStorage = env.remoteStorage;
+      // if we loaded the tag module correctly, it should have returned
+      // a function for us to use.
+      this.assertTypeAnd(moduleImport, 'function');
+      //var tagModule_exports = moduleImport[1](env.remoteStorage.baseClient, env.remoteStorage.baseClient).exports;
+      env.tagModule = moduleImport.getPrivateListing('videos');
+      this.assertType(env.tagModule, 'object');*/
+  },
+  takedown: function(env, test) {
+    env.serverHelper.stop(function() {
+      test.result(true);
+    });
+  },
+  beforeEach: function (env, test) {
+    // BEFORE EACH TEST
+    env.serverHelper.resetState();
+    env.serverHelper.setScope([':rw']);
+
+    env.rsConnect = function() {
+      env.remoteStorage.nodeConnect.setStorageInfo(
+        env.serverHelper.getStorageInfo()
+      );
+      env.remoteStorage.nodeConnect.setBearerToken(
+        env.serverHelper.getBearerToken()
+      );
+      return env.remoteStorage.claimAccess('root', 'rw');
+    };
+    env.rsConnect().then(function() {
+      test.result(true);
+    });
+
+  },
+  afterEach: function (env, test) {
+    env.remoteStorage.sync.needsSync('/').then(function(unsynced) {
+      // if unsynced is true, somethings wrong
+      if (unsynced) {
+        test.result(false, 'client needsSync = true, thats not good');
+      }
+      env.remoteStorage.flushLocal().then(curry(test.result.bind(test), true));
+    });
+  },
+  tests: [
+    {
+      desc: "tag module has getAllTags function",
+      run: function(env) {
+        this.assertType(env.tagModule.getAllTags, 'function');
+      }
     },
-    tests: [
-        {
-            desc: "tag module has getAllTags function",
-            run: function(env) {
-                this.assertType(env.tagModule.getAllTags, 'function');
-            }
-        },
-        {
-            desc: "getTags should return our preset list of tag names",
-            run: function(env) {
-                var d = env.tagModule.getAllTags();
-                this.assert(d, env.presets.getTags);
-            }
-        },
-        {
-            desc: "getTagsByRecord should return a list of tags for that id",
-            run: function(env) {
-                var d = env.tagModule.getTagsByRecord('12345');
-                this.assert(d, env.presets.getTagsByRecord);
-            }
-        },
-        {
-            desc: "getTagged should return a list of ids for that tag",
-            run: function(env) {
-                var d = env.tagModule.getTagged('aardvark');
-                this.assert(d, env.presets.getTagged);
-            }
-        },
-        {
-            desc: "addTagged should add a list of ids to a tag",
-            run: function(env) {
-                env.tagModule.addTagged('aardvark', ['qwerty', 'foobar']);
-                var d = env.tagModule.getTagged('aardvark');
-                env.presets.getTagged.push('qwerty');
-                env.presets.getTagged.push('foobar');
-                this.assert(d, env.presets.getTagged);
-            }
-        },
+    {
+      desc: "add tags",
+      run: function(env, test) {
+        return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          test.result(true);
+        }, function (err) {
+          test.result(false, err);
+        });
+
+      }
+    },
+    {
+      desc: "getTagsByRecord should return 'dog' in list of tag names",
+      run: function(env, test) {
+        return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.getTagsByRecord('dog1').then(function (result) {
+            test.assert(result, ['dog']);
+          });
+        });
+      }
+    },
+    {
+      desc: "getTagsByRecord should return 'dog' and 'brown' list of tag names",
+      run: function(env, test) {
+        return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.addTagged('brown', ['dog1']);
+        }).then(function (result) {
+          return env.tagModule.getTagsByRecord('dog1').then(function (result) {
+            test.assert(result, ['dog', 'brown']);
+          });
+        });
+      }
+    },
+    {
+      desc: "getTagsByRecord should return 'dog' 'little puppy' and 'brown' list of tag names",
+      run: function(env, test) {
+        return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.addTagged('brown', ['dog1']);
+        }).then(function (result) {
+          return env.tagModule.addTagged('little pup', ['dog1']);
+        }).then(function (result) {
+          return env.tagModule.getTagsByRecord('dog1').then(function (result) {
+            test.assert(result, ['dog', 'brown', 'little pup']);
+          });
+        });
+      }
+    },
+    {
+      desc: "getTagged should return dog1,2,3 for the tag 'dog'",
+      run: function(env, test) {
+        return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.getTagged('dog').then(function (result) {
+            test.assert(result, ['dog1', 'dog2', 'dog3']);
+          });
+        });
+      }
+    },
+    {
+      desc: "checking addTagsByRecord",
+      run: function(env, test) {
+        return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.addTagsToRecord('dog2', ['brown', 'little pup']);
+        }).then(function (result) {
+          return env.tagModule.getTagsByRecord('dog2').then(function (result) {
+            test.assert(result, ['dog', 'brown', 'little pup']);
+          });
+        });
+      }
+    }
+/*
         {
             desc: "addTagsToRecord should add a list of tags to a recordId",
             run: function(env) {
@@ -117,22 +227,8 @@ suites.push({
                 this.assert(d, []);
             }
         },
-        {
-            desc: "addTagsToRecord and create a new tagname with a space in it",
-            run: function(env) {
-                env.tagModule.addTagsToRecord(['67890'], ['travel', 'hello world']);
-                var d = env.tagModule.getTagsByRecord('67890');
-                env.presets.getTagsByRecord.push('hello world');
-                console.log(env.presets.getTagsByRecord);
-                console.log(d);
-                this.assert(d, env.presets.getTagsByRecord);
-            }
-        }
-    ],
-    takedown: function() {
-        delete global.remoteStorage;
-        this.result(true);
-    }
+        */
+    ]
 });
 
 suites.push({

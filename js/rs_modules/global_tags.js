@@ -1,12 +1,15 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-define(['remotestorage/remoteStorage'], function(remoteStorage) {
+
+global.localStorage = require('localStorage');
+
+define(['rs/remoteStorage'], function(remoteStorage) {
 
   var curry = remoteStorage.util.curry;
   var asyncEach = remoteStorage.util.asyncEach;
 
-  var global_tags = remoteStorage.defineModule('tags', function(privateClient, publicClient) {
+  remoteStorage.defineModule('tags', function(privateClient, publicClient) {
     //"use strict";
     var moduleName = 'tags';
     privateClient.use('');
@@ -51,7 +54,7 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
            * @returns {array}
            */
           pub.getAllTags = function() {
-            //console.log('TAGS: getTags()');
+            console.log('TAGS: getAllTags()');
             return privateClient.getListing('names/').
               then(function(tags) {
                 var num_tags = tags.length;
@@ -85,10 +88,10 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
            * @returns {array} array of tag names
            */
           pub.getTagsByRecord = function(recordId) {
-            //console.log("TAGS: getTagsByRecord("+recordId+")");
+            //console.log("TAGS: getTagsByRecord("+recordId+") DOCTYPE:"+_.docType);
             var return_val = [];
             return privateClient.getObject('reverse/'+_.docType+'/'+recordId).
-              then(function(obj) {
+              then(function (obj) {
                 if (typeof obj === "object") {
                   return_val = obj;
                 }
@@ -124,15 +127,16 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
 
             tagName = tagName.replace(/\s+$/g, ''); // no whitespace at end of string
             tagName = tagName.replace(/^\s+/g, ''); // or beginning
-            var existingIds = privateClient.getObject('names/'+tagName+'/'+_.docType);
-            if (!existingIds) {
-              existingIds = [];
-            }
+            return privateClient.getObject('names/'+tagName+'/'+_.docType).then(function (result) {
+              var existingIds = _.ensureArray(result);
+              var unique_obj = _.mergeAndUnique(recordIds, existingIds);
+              console.log('ADD_TAGGED: '+tagName);
 
-            var unique_obj = _.mergeAndUnique(existingIds, recordIds);
-
-            _.addReverse(tagName, recordIds); // add ids to tags reverse lookup document
-            return privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, unique_obj);
+              // add ids to tags reverse lookup document
+              return _.addReverse(tagName, recordIds).then(function() {
+                return privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, unique_obj);
+              });
+            });
           };
 
           /**
@@ -142,8 +146,8 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
            */
           pub.addTagsToRecord = function(recordId, tagNames) {
             //console.log('TAGS: addTagsToRecord: ', tagNames);
-
             return asyncEach(_.ensureArray(tagNames), function(tagName) {
+              console.log("ADDING: "+tagName+' rid:'+recordId);
               return pub.addTagged(tagName, recordId);
             });
           };
@@ -223,8 +227,13 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
                       updatedTags.push(existingTags[j]);
                     }
                   }
-                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], updatedTags);
+                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordId, updatedTags);
                 });
+            }).then(function(results, errors) {
+              if(errors.length > 0) {
+                throw "ERRORS: " + errors.join(', ');
+              }
+              return results;
             });
           };
 
@@ -246,8 +255,13 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
                   }
                   var uniqueTagNames = _.mergeAndUnique(existingTags, tagNames);
                   //console.log('STORING: reverse/'+_.docType+'/'+recordIds[i], uniqueTagNames);
-                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordIds[i], uniqueTagNames);
+                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordId, uniqueTagNames);
                 });
+            }).then(function(results, errors) {
+              if(errors.length > 0) {
+                throw "ERRORS: " + errors.join(', ');
+              }
+              return results;
             });
           };
 
@@ -259,6 +273,8 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
            */
           _.mergeAndUnique = function(obj1, obj2) {
             // merge new tags in with existing
+            //console.log('MAU obj1: '+obj1.concat);
+            //console.log('MAU obj2: '+obj2.concat);
             var new_obj = obj1.concat(obj2).sort();
 
             // unique entries only, filter out dupes
@@ -277,13 +293,13 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
            * @param  {array|string} recordIds   - string or array of recordIds
            * @return {array} array of record ids
            */
-          _.ensureArray = function(recordIds) {
-            if (typeof recordIds === 'string') {
-              recordIds = [recordIds];
-            } else if (recordIds === undefined) {
-              recordIds = [];
+          _.ensureArray = function(vals) {
+            if (typeof vals === 'string') {
+              vals = [vals];
+            } else if (vals === undefined) {
+              vals = [];
             }
-            return recordIds;
+            return vals;
           };
 
           return pub;
@@ -292,5 +308,5 @@ define(['remotestorage/remoteStorage'], function(remoteStorage) {
       }
     };
   });
-  return global_tags;
+  return remoteStorage.tags;
 });

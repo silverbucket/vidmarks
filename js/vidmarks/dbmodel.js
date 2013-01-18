@@ -3,7 +3,7 @@
  *
  * requires: remoteStorage.js
  */
-define(['remotestorage/remoteStorage', 'rs_modules/global_tags', 'rs_modules/videos'], function(remoteStorage, global_tags, videos) {
+define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos'], function(remoteStorage, global_tags, videos) {
   var pub = {}; // public variable and functions container
   var _ = {}; // private variable and functions container
 
@@ -121,13 +121,11 @@ define(['remotestorage/remoteStorage', 'rs_modules/global_tags', 'rs_modules/vid
   };
 
   pub.addTagsToRecord = function(recordId, tagNames, completedFunc) {
-    _.modules.tags.addTagsToRecord(recordId, tagNames);
-    completedFunc();
+    _.modules.tags.addTagsToRecord(recordId, tagNames).then(completedFunc);
   };
 
   pub.updateTagsForRecord = function(recordId, tagNames, completedFunc) {
-    _.modules.tags.updateTagsForRecord(recordId, tagNames);
-    completedFunc();
+    _.modules.tags.updateTagsForRecord(recordId, tagNames).then(completedFunc);
   };
 
   pub.addVidmark = function(vidmark_id) {
