@@ -1,12 +1,12 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-define(['rs'], function(remoteStorage) {
+define(['rs/remoteStorage'], function(remoteStorage) {
 
   var curry = remoteStorage.util.curry;
   var asyncEach = remoteStorage.util.asyncEach;
 
-  var videos = remoteStorage.defineModule('videos', function(privateClient, publicClient) {
+  remoteStorage.defineModule('videos', function(privateClient, publicClient) {
     var moduleName = 'videos';
     privateClient.use('');
     publicClient.use('');
@@ -113,6 +113,6 @@ define(['rs'], function(remoteStorage) {
       }
     };
   });
-  return videos;
+  return remoteStorage.videos;
 });
 

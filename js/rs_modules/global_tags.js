@@ -2,7 +2,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
-global.localStorage = require('localStorage');
+//global.localStorage = require('localStorage');
 
 define(['rs/remoteStorage'], function(remoteStorage) {
 
@@ -16,21 +16,21 @@ define(['rs/remoteStorage'], function(remoteStorage) {
     publicClient.use('');
 
     privateClient.declareType('tag', {
-        "description": "a method of tracking tags and references to the module records that they've been related to",
-        "type":"array",
-        "items": {
-          "title": "a collection of record id's associated with this tag name + docType",
-          "type": "string"
-        }
+      "description": "a method of tracking tags and references to the module records that they've been related to",
+      "type":"array",
+      "items": {
+        "title": "a collection of record id's associated with this tag name + docType",
+        "type": "string"
+      }
     });
 
     privateClient.declareType('reverse', {
-        "description": "a method of tracking tags and references to the module records that they've been related to",
-        "type":"array",
-        "items": {
-          "title": "a collection of tags names associated with this record ID + docType",
-          "type": "string"
-        }
+      "description": "a method of tracking tags and references to the module records that they've been related to",
+      "type":"array",
+      "items": {
+        "title": "a collection of tags names associated with this record ID + docType",
+        "type": "string"
+      }
     });
 
     return {
@@ -65,22 +65,6 @@ define(['rs/remoteStorage'], function(remoteStorage) {
                 return r_tags;
               });
           };
-
-          /**
-           * get list of existing tags already used for this doctype
-           * @returns {array}
-           */
-          /*pub.getUsedTags = function() {
-            //console.log('TAGS: getTags()');
-            var tags = privateClient.getListing('names/');
-            var num_tags = tags.length;
-            var r_tags = [];
-            for (var i = 0; i < num_tags; i++) {
-              console.log('*****'+tags[i]);
-              r_tags.push(tags[i].replace(/\//g,""));
-            }
-            return r_tags;
-          };*/
 
           /**
            * get a list of all tags which have a specified record ID

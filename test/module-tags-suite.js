@@ -7,6 +7,8 @@ require.config({
     rs_base: 'vendor/remoteStorage'
   }
 });
+global.localStorage = require('localStorage');
+
 define(['js/rs_modules/global_tags'], function(moduleImport, undefined) {
 var suites = [];
 suites.push({
@@ -45,44 +47,6 @@ suites.push({
       env.serverHelper.start(curry(test.result.bind(test), true));
     });
 
-
-    /*  env.presets = {};
-      // a sample data set which should properly represet the way remoteStorage
-      // data is stored.
-      env.remoteStorage = new this.Stub.mock.remoteStorage({
-          'names/dog' : {},
-          'names/dog/videos': [ '12345', '67890', 'abcde', 'fghij' ],
-          'names/cat': {},
-          'names/cat/videos': [ '34567', 'abcde' ],
-          'names/horse': {},
-          'names/horse/videos': [ '12345', 'fghij', '67890' ],
-          'names/aardvark': {},
-          'names/aardvark/videos': [ '34567', 'defgh' ],
-          'reverse/videos': {},
-          'reverse/videos/12345': ['horse', 'dog'],
-          'reverse/videos/67890': ['horse', 'dog'],
-          'reverse/videos/abcde': ['cat', 'dog'],
-          'reverse/videos/fghij': ['horse', 'dog'],
-          'reverse/videos/34567': ['cat', 'aardvark'],
-          'reverse/videos/defgh': ['aardvark']
-      });
-      // the expected restults from the various module functions called
-      env.presets.docType = 'videos';
-      env.presets.getTags = ['dog', 'cat', 'horse', 'aardvark'];
-      env.presets.getTagsByRecord = ['dog', 'horse'];
-      env.presets.getTagged = ['34567', 'defgh'];
-
-      this.assertTypeAnd(env.remoteStorage, 'object');
-      this.assertTypeAnd(env.remoteStorage.baseClient, 'function');
-      this.assertType(env.remoteStorage.defineModule, 'function');
-
-      global.remoteStorage = env.remoteStorage;
-      // if we loaded the tag module correctly, it should have returned
-      // a function for us to use.
-      this.assertTypeAnd(moduleImport, 'function');
-      //var tagModule_exports = moduleImport[1](env.remoteStorage.baseClient, env.remoteStorage.baseClient).exports;
-      env.tagModule = moduleImport.getPrivateListing('videos');
-      this.assertType(env.tagModule, 'object');*/
   },
   takedown: function(env, test) {
     env.serverHelper.stop(function() {
@@ -194,43 +158,49 @@ suites.push({
       }
     },
     {
-      desc: "removeTagged should remove recordID from a tag",
+      desc: "removeTagged should remove recordID from a tag - verify reverse lookup",
       run: function(env, test) {
-        //env.tagModule.removeTagged('travel', '67890');
-        //var d = env.tagModule.getTagged('travel');
-        //this.assert(d, ['12345']);
         env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
-          console.log('1');
           return env.tagModule.addTagsToRecord('dog2', ['brown', 'little pup']);
         }).then(function (result) {
-          console.log('2');
           return env.tagModule.removeTagged('brown', 'dog2');
         }).then(function (result) {
-          console.log('3');
           return env.tagModule.getTagsByRecord('dog2');
         }).then(function (result) {
-          console.log('4: ',result);
           test.assert(result, ['dog', 'little pup']);
+        });
+      }
+    },
+    {
+      desc: "removeTagged should remove recordID from a tag",
+      run: function(env, test) {
+        env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.addTagged('brown', ['dog1', 'dog2', 'dog3']);
+        }).then(function (result) {
+          return env.tagModule.removeTagged('brown', 'dog2');
+        }).then(function (result) {
+          return env.tagModule.getTagged('brown');
+        }).then(function (result) {
+          test.assert(result, ['dog1', 'dog3']);
+        });
+      }
+    },
+    {
+      desc: "removeRecord should remove recordID from all tags",
+      run: function(env, test) {
+        env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.addTagged('brown', ['dog1', 'dog2', 'dog3']);
+        }).then(function (result) {
+          return env.tagModule.removeRecord('dog2');
+        }).then(function (result) {
+          return env.tagModule.getTagged('brown');
+        }).then(function (result) {
+          test.assert(result, ['dog1', 'dog3']);
         });
       }
     }
 
 /*
-        {
-            desc: "removeTagged should remove recordID from a tag",
-            run: function(env) {
-                env.tagModule.removeTagged('travel', '67890');
-                var d = env.tagModule.getTagged('travel');
-                this.assert(d, ['12345']);
-            }
-        },
-        {
-            desc: "verify that the reverse lookup was updated as well",
-            run: function(env) {
-                var d = env.tagModule.getTagsByRecord('67890');
-                this.assert(d, ['dog', 'horse', 'penguin']);
-            }
-        },
         {
             desc: "removeRecord should remove recordID from all tags",
             run: function(env) {
