@@ -228,7 +228,7 @@ define(['rs/remoteStorage', 'js/plugins', 'js/vidmarks/nav', 'js/video_site_api'
               thumbnail: list[id]['thumbnail'],
               tags: tags_formatted
             }) + '</article>' + video_list;
-          console.log('video-list:'+video_list);
+          //console.log('video-list:'+video_list);
         });
         //console.log('END ['+id+']');
       }).then(function (result, errors) {
