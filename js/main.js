@@ -9,7 +9,7 @@ require.config( {
   baseUrl: '/'
 });
 
-require(['vidmarks'], function(vidmarks) {
+require(['js/vidmarks'], function(vidmarks) {
   vidmarks.init();
 });
 
