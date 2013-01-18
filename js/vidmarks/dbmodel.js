@@ -77,47 +77,58 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
   };
 
   pub.getAllTags = function() {
-    return _.modules.tags.getAllTags();
+    return _.modules.tags.getAllTags().then(function(results) {
+      return results;
+    });
   };
 
   pub.getUsedTags = function() {
-    var tags = _.modules.tags.getAllTags();
-    var used_tags = [];
-    var vidmarks = pub.getAll();
+    return _.modules.tags.getAllTags().then(function(tags) {
+      var used_tags = [];
+      var vidmarks = pub.getAll();
 
-    var num_tags = tags.length;
-    for (var i = 0; i < num_tags; i++) {
-      var tagRecords = _.modules.tags.getTagged(tags[i]);
-      var count = 0;
-      var num_tagRecords = tagRecords.length;
-      for (var j = 0; j < num_tagRecords; j++) {
-        if (!vidmarks[tagRecords[j]]) {
-          //console.log('DB_getTagCounts - remove record['+tags[i]+'] from tag');
-          _.modules.tags.removeTagged(tags[i], tagRecords[j]);
-        } else {
-          //console.log('DB_getTagCounts - add count for record ['+tags[i]+']');
-          used_tags.push(tags[i]);
-        }
-      }
-    }
-    return used_tags;
+      return remoteStorage.util.asyncEach(tags, function(tag) {
+        return _.modules.tags.getTagged(tag).then(function(tagRecords) {
+          var count = 0;
+          var num_tagRecords = tagRecords.length;
+          for (var j = 0; j < num_tagRecords; j++) {
+            /*if (!vidmarks[tagRecords[j]]) {
+              //console.log('DB_getTagCounts - remove record['+tags[i]+'] from tag');
+              _.modules.tags.removeTagged(tag, tagRecords[j]);
+            } else {*/
+              //console.log('DB_getTagCounts - add count for record ['+tags[i]+']');
+              used_tags.push(tag);
+            //}
+          }
+        });
+      }).then(function(result, errors) {
+        console.log('getUsedTags() ERRORS', errors);
+        return used_tags;
+      });
+
+    });
+
   };
 
   pub.getTagCounts = function() {
-    var tags = pub.getUsedTags();
-    var num_tags = tags.length;
-    var r_struct = {};
-    for (var i = 0; i < num_tags; i++) {
-      var tagRecords = _.modules.tags.getTagged(tags[i]);
-      r_struct[tags[i]] = tagRecords.length; //tag_recs.length;
-    }
-    return r_struct;
+    return pub.getUsedTags().then(function(tags) {
+      var r_struct = {};
+      return remoteStorage.util.asyncEach(tags, function (tag) {
+        return _.modules.tags.getTagged(tag).then(function(tagRecords) {
+          r_struct[tag] = tagRecords.length; //tag_recs.length;
+        });
+      }).then(function (result, errors) {
+        console.log('getTagCounts() ERRORS', errors);
+        return r_struct;
+      });
+    });
   };
 
   pub.getTagsByRecord = function(recordId) {
-    var tags = _.modules.tags.getTagsByRecord(recordId);
-    console.log('DB getTagsByRecord('+recordId+') -- result: ', tags);
-    return tags;
+    return _.modules.tags.getTagsByRecord(recordId).then(function (tags) {
+      console.log('DB getTagsByRecord('+recordId+') -- result: ', tags);
+      return tags;
+    });
   };
 
   pub.addTagsToRecord = function(recordId, tagNames, completedFunc) {
@@ -139,10 +150,15 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
     var cache_id = details.source+'_'+details.vid_id;
     if (vidmark_id === cache_id) {
       console.log('ID match! we can save');
-      _.modules.videos.add(details, cache_id);
-      _.modules.tags.addTagsToRecord(cache_id, tags);
+      return remoteStorage.util.asyncGroup(
+        function() { return _.modules.videos.add(details, cache_id); },
+        function() { return _.modules.tags.addTagsToRecord(cache_id, tags); }
+      ).then(function (_, errors) {
+        console.log('addVidmark() ERRORS: ', errors);
+      });
     } else {
       console.log('IDs do not match ['+vidmark_id+' = '+cache_id+']');
+      return remoteStorage.util.getPromise().failLater();
     }
     //var new_id = _.modules.bookmarks.add(url, title, description);
     //return new_id;
@@ -160,37 +176,47 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
    *
    */
   pub.removeVidmark = function(video_id) {
-    _.modules.tags.removeRecord(video_id);
-    _.modules.videos.remove(video_id);
+    return remoteStorage.util.asyncGroup(
+      function () { return _.modules.tags.removeRecord(video_id); },
+      function () { return _.modules.videos.remove(video_id); }
+    ).then(function (_, errors) {
+        console.log('addVidmark() ERRORS: ', errors);
+    });
   };
 
   pub.getAll = function() {
     console.log('- DB: getAll()');
-    var ids = _.modules.videos.getIds();
     var all = {};
-    var num_ids = ids.length;
-    for (var i = 0; i < num_ids; i++) {
-      var obj = _.modules.videos.get(ids[i]);
-      all[ids[i]] = obj;
-    }
-    return all;
+    return _.modules.videos.getIds().then(function (ids) {
+      return remoteStorage.util.asyncEach(ids, function (id) {
+        return _.modules.videos.get(id).then(function(obj) {
+          all[id] = obj;
+        });
+      }).then(function (_, errors) {
+        console.log('getAll() ERRORS: ', errors);
+        return all;
+      });
+    });
   };
 
-  pub.getById = function(id) {
-    var obj = _.modules.videos.get();
-    return obj;
+  pub.getById = function (id) {
+    return _.modules.videos.get().then(function(obj) {
+      return obj;
+    });
   };
 
-  pub.deleteAllVideos = function() {
+  pub.deleteAllVideos = function () {
     console.log('- DB: deleteAllVideos()');
-    var ids = _.modules.videos.getIds();
-    console.log(ids);
-    var all = {};
-    var num_ids = ids.length;
-    for (var i = 0; i < num_ids; i++) {
-      _.modules.videos.remove(ids[i]);
-    }
-    return all;
+    return _.modules.videos.getIds().then(function (ids) {
+      var all = {};
+      console.log(ids);
+      return remoteStorage.util.asyncEach(ids, function (id) {
+        _.modules.videos.remove(ids[i]);
+      }).then(function (_, errors) {
+        console.log('deleteAllVideos() ERRORS: ', errors);
+        return all;
+      });
+    });
   };
 
   return pub;

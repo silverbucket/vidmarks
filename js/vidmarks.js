@@ -3,22 +3,18 @@
  *
  * requires: jQuery
  */
-define(function(require) {
+//define([], function(require) {
+define(['rs/remoteStorage', 'js/plugins', 'js/vidmarks/nav', 'js/video_site_api', 'js/vidmarks/dbmodel'], function(remoteStorage, plugins, nav, vidAPI, db) {
   var pub = {};
   var _ = {};
 
   pub.init = function() {
     console.log('Vidmarks being inited');
-    //_.util = net.silverbucket.vidmarks.utilityFunctions;
-    var plugins = require('js/plugins');
-    _.nav = require('js/vidmarks/nav');
-    _.nav.init(['list']);//, 'submit']);
-    _.nav.toggle('list');
-    _.vidAPI = require('js/video_site_api');
-    _.db = require('js/vidmarks/dbmodel');
-    _.db.init();
+    nav.init(['list']);
+    nav.toggle('list');
+    db.init();
 
-    _.db.onAction('change', function(event) {
+    db.onAction('change', function(event) {
       console.log('DB.onAction EVENT: ', event);
       if(event.newValue && event.oldValue) {
         //updateBookmarkRow(event.path, event.newValue);
@@ -30,17 +26,16 @@ define(function(require) {
       }
     });
 
-
     /*
      * navigation
      */
     $("a#link-submit").click(function() {
-      _.nav.toggle('submit');
+      nav.toggle('submit');
       return false;
     });
 
     $("a#link-list").click(function() {
-      _.nav.toggle('list');
+      nav.toggle('list');
 
       pub.displayVidmarkList();
 
@@ -56,9 +51,9 @@ define(function(require) {
       // Short pause to wait for paste to complete
       setTimeout( function() {
         var url = $(_this).val();
-        if (!_.vidAPI.retrieveDetails(url, pub.displayNewVidmark,
+        if (!vidAPI.retrieveDetails(url, pub.displayNewVidmark,
                                       pub.displayErrorVidmark)) {
-          pub.displayMessage(_.vidAPI.getErrorMessage(), 'error');
+          pub.displayMessage(vidAPI.getErrorMessage(), 'error');
         }
       }, 100);
     });
@@ -67,9 +62,9 @@ define(function(require) {
                                   'input#input_vid_url', function (e) {
       if (e.which == 13) {
         var url = $(this).val();
-        if (!_.vidAPI.retrieveDetails(url, pub.displayNewVidmark,
+        if (!vidAPI.retrieveDetails(url, pub.displayNewVidmark,
                                       pub.displayErrorVidmark)) {
-          pub.displayMessage(_.vidAPI.getErrorMessage(), 'error');
+          pub.displayMessage(vidAPI.getErrorMessage(), 'error');
         }
         return false;
       }
@@ -90,9 +85,10 @@ define(function(require) {
       submitHandler: function(form) {
         console.log('form submittion passed validation');
         var url = $('#input_vid_url').val();
-        _.db.addVidmark(url);
-        $('#input_vid_url').val('');
-        return false;
+        return db.addVidmark(url).then(function() {
+          $('#input_vid_url').val('');
+          return false;
+        });
       }
     });
 
@@ -104,7 +100,7 @@ define(function(require) {
         var id = $(this).parent().parent().attr('id');
         console.log('ENTER was pressed tag field ['+id+']');
         var tag_list = _.getInputTags(id);
-        _.db.updateTagsForRecord(id, tag_list, function() {
+        db.updateTagsForRecord(id, tag_list, function() {
               _.updateTagStatus(id, 'tags updated!');
             });
         pub.displayTagList(); // update tags list
@@ -117,7 +113,7 @@ define(function(require) {
     $("section#vidmarks").on('click', 'a.delete', function(e) {
       var id = $(this).parent().parent().attr('id');
       //console.log('id:'+id+' wants to be deleteded');
-      _.db.removeVidmark(id);
+      db.removeVidmark(id);
       return false;
     });
 
@@ -176,28 +172,30 @@ define(function(require) {
       return false;
     }
 
-    _.db.setCache('video', details); // cache the details in case of save
-    _.db.addVidmark(record_id);
-    $('#message').html('<p class="success">video saved!</p>');
+    db.setCache('video', details); // cache the details in case of save
+    db.addVidmark(record_id).then(function () {
+      $('#message').html('<p class="success">video saved!</p>');
 
 
-    $("#vidmarks").prepend('<article id="' + record_id + '" class="vidmark">' +
-          _.string_inject(_.templates.display_vidmark, {
-              title: details['title'],
-              visit_url: details['visit_url'],
-              description: (details['description']) ?
-                                  details['description'] : ' ',
-              embed_url: details['embed_url'],
-              thumbnail: details['thumbnail'],
-              tags: ''
-            }) + '</article>'
-        );
+      $("#vidmarks").prepend('<article id="' + record_id + '" class="vidmark">' +
+            _.string_inject(_.templates.display_vidmark, {
+                title: details['title'],
+                visit_url: details['visit_url'],
+                description: (details['description']) ?
+                                    details['description'] : ' ',
+                embed_url: details['embed_url'],
+                thumbnail: details['thumbnail'],
+                tags: ''
+              }) + '</article>'
+          );
 
-    $('#message p').fadeOut('slow');
-    //$('#'+record_id).removeClass('new_vidmark');
-    $('#'+record_id).animate({backgroundColor: '#FFEAFF'}, 'slow', function() {
-      $('#'+record_id).animate({backgroundColor: '#FFFFFF'}, 'slow');
+      $('#message p').fadeOut('slow');
+      //$('#'+record_id).removeClass('new_vidmark');
+      $('#'+record_id).animate({backgroundColor: '#FFEAFF'}, 'slow', function() {
+        $('#'+record_id).animate({backgroundColor: '#FFFFFF'}, 'slow');
+      });
     });
+
   };
 
   /*
@@ -205,35 +203,40 @@ define(function(require) {
    */
   pub.displayVidmarkList = function() {
     console.log('displayVidmarkList()');
-    var list = _.db.getAll();
-    _.vidmarks = list;
-    $("#vidmarks").html('');
     var video_list = '';
-    for (var id in list) {
-      console.log('processing ['+id+'] '+list[id]+'|');
-      if (list[id] === undefined) {
-        // this video has been delted, update the tags
-        console.log('displayVidmarksList() - this id[' + id +
-                    '] is no good, removing it from storage');
-        _.db.removeVidmark(id);
-        continue;
-      }
-      var tags = _.db.getTagsByRecord(id);
-      var tags_formatted = _.formatTagList(tags);
-      video_list = '<article id="' + id + '" class="vidmark">' +
-        _.string_inject(_.templates.display_vidmark, {
-            title: list[id]['title'],
-            visit_url: list[id]['visit_url'],
-            description: (list[id]['description']) ?
-                                list[id]['description'] : ' ',
-            embed_url: list[id]['embed_url'],
-            thumbnail: list[id]['thumbnail'],
-            tags: tags_formatted
-          }) + '</article>' + video_list;
-      //console.log('END ['+id+']');
-    }
-    // write to dom for entire list just once
-    $("#vidmarks").append(video_list);
+    return db.getAll().then(function (list) {
+      console.log('list:',list);
+      _.vidmarks = list;
+      $("#vidmarks").html('');
+      return remoteStorage.util.asyncEach(Object.keys(list), function (id) {
+        console.log('processing ['+id+'] '+list[id]+'|');
+        if (list[id] === undefined) {
+          // this video has been delted, update the tags
+          console.log('displayVidmarksList() - this id[' + id +
+                      '] is no good, removing it from storage');
+          return db.removeVidmark(id);
+        }
+        return db.getTagsByRecord(id).then(function (tags) {
+          var tags_formatted = _.formatTagList(tags);
+          video_list = '<article id="' + id + '" class="vidmark">' +
+            _.string_inject(_.templates.display_vidmark, {
+              title: list[id]['title'],
+              visit_url: list[id]['visit_url'],
+              description: (list[id]['description']) ?
+                                  list[id]['description'] : ' ',
+              embed_url: list[id]['embed_url'],
+              thumbnail: list[id]['thumbnail'],
+              tags: tags_formatted
+            }) + '</article>' + video_list;
+          console.log('video-list:'+video_list);
+        });
+        //console.log('END ['+id+']');
+      }).then(function (result, errors) {
+        console.log('displayVidmarkList() ERRORS:', errors);
+        // write to dom for entire list just once
+        $("#vidmarks").append(video_list);
+      });
+    });
   };
 
   /*
@@ -241,17 +244,19 @@ define(function(require) {
    */
   pub.displayTagList = function() {
     console.log('displayTagList()');
-    var list = _.db.getTagCounts();
-    console.log('displayTagList()  - return value: ',list);
-    $("aside ul#full_tag_list").html('');
+    db.getTagCounts().then(function (list) {
+      console.log('displayTagList()  - return value: ',list);
+      $("aside ul#full_tag_list").html('');
 
-    for (var tag in list) {
-      //console.log('processing ['+tag+']');
-      //console.log('appending: <li id="'+tag+'">'+tag+' ('+list[tag]+')</li>');
-      $('aside ul#full_tag_list').append('<li>' + tag + '</li> (' +
-                                         list[tag] + ')<br />');
-      //console.log('END ['+id+']');
-    }
+      for (var tag in list) {
+        //console.log('processing ['+tag+']');
+        //console.log('appending: <li id="'+tag+'">'+tag+' ('+list[tag]+')</li>');
+        $('aside ul#full_tag_list').append('<li>' + tag + '</li> (' +
+                                           list[tag] + ')<br />');
+        //console.log('END ['+id+']');
+      }
+    });
+
   };
 
   pub.displayErrorVidmark = function() {
@@ -295,7 +300,7 @@ define(function(require) {
   };
   _.getTagSuggestions = function(word) {
     console.log('getSuggestions for '+word);
-    var tags = _.db.getAllTags();
+    var tags = db.getAllTags();
     var reg = new RegExp("^"+word+"\\w*");
     var suggestions = [];
     var numTags = tags.length;
