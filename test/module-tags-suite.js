@@ -195,20 +195,24 @@ suites.push({
     },
     {
       desc: "removeTagged should remove recordID from a tag",
-        run: function(env) {
-          env.tagModule.removeTagged('travel', '67890');
-          var d = env.tagModule.getTagged('travel');
-          this.assert(d, ['12345']);
-          return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
-            return env.tagModule.addTagsToRecord('dog2', ['brown', 'little pup']);
-          }).then(function (result) {
-            return env.tagModule.removeTagged('dog2', 'brown');
-          }).then(function (result) {
-            return env.tagModule.getTagsByRecord('dog2');
-          }).then(function (result) {
-            test.assert(result, ['dog', 'little pup']);
-          });
-        }
+      run: function(env, test) {
+        //env.tagModule.removeTagged('travel', '67890');
+        //var d = env.tagModule.getTagged('travel');
+        //this.assert(d, ['12345']);
+        env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          console.log('1');
+          return env.tagModule.addTagsToRecord('dog2', ['brown', 'little pup']);
+        }).then(function (result) {
+          console.log('2');
+          return env.tagModule.removeTagged('brown', 'dog2');
+        }).then(function (result) {
+          console.log('3');
+          return env.tagModule.getTagsByRecord('dog2');
+        }).then(function (result) {
+          console.log('4: ',result);
+          test.assert(result, ['dog', 'little pup']);
+        });
+      }
     }
 
 /*

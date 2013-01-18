@@ -198,7 +198,13 @@ define(['rs/remoteStorage'], function(remoteStorage) {
                   }
                 }
                 return _.removeTagFromReverse(recordIds, tagName).
-                  then(curry(privateClient.storeObject, 'tag', 'names/'+tagName+'/'+_.docType, existingIds));
+                  then(function() {
+                    if (existingIds.length === 0) {
+                      return privateClient.remove('names/'+tagName+'/'+_.docType);
+                    } else {
+                      return privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, existingIds);
+                    }
+                  });
               });
           };
 
@@ -237,7 +243,12 @@ define(['rs/remoteStorage'], function(remoteStorage) {
                       updatedTags.push(existingTags[j]);
                     }
                   }
-                  return privateClient.storeObject('reverse', 'reverse/'+_.docType+'/'+recordId, updatedTags);
+
+                  if (updatedTags.length === 0) {
+                    return privateClient.remove('reverse/'+_.docType+'/'+recordId);
+                  } else {
+                    return privateClient.storeObject('tag', 'reverse/'+_.docType+'/'+recordId, updatedTags);
+                  }
                 });
             }).then(function(results, errors) {
               if(errors.length > 0) {
