@@ -1,5 +1,5 @@
 if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
+  var define = require('amdefine')(module);
 }
 require.config({
   paths: {
@@ -8,7 +8,6 @@ require.config({
   }
 });
 global.localStorage = require('localStorage');
-
 define(['js/rs_modules/global_tags'], function(moduleImport, undefined) {
 var suites = [];
 suites.push({
