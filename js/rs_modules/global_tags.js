@@ -226,7 +226,7 @@ define(['rs/remoteStorage'], function(remoteStorage) {
             recordIds = _.ensureArray(recordIds);
 
             return asyncEach(recordIds, function(recordId) {
-              return pub.getTagsByRecordId(recordId).
+              return pub.getTagsByRecord(recordId).
                 then(function(existingTags) {
                   var num_existingTags = existingTags.length;
                   var updatedTags = [];

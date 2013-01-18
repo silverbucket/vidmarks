@@ -204,9 +204,9 @@ suites.push({
           }).then(function (result) {
             return env.tagModule.removeTagged('dog2', 'brown');
           }).then(function (result) {
-            return env.tagModule.getTagsByRecord('dog2').then(function (result) {
-              test.assert(result, ['dog', 'little pup']);
-            });
+            return env.tagModule.getTagsByRecord('dog2');
+          }).then(function (result) {
+            test.assert(result, ['dog', 'little pup']);
           });
         }
     }
