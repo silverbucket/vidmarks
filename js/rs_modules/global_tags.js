@@ -120,8 +120,12 @@ define(['rs/remoteStorage'], function(remoteStorage) {
            * add to a list of record IDs to a tag.
            * @param {string}  tagName   - tag name
            * @param {array}   recordIds - list of record IDs
+           * @oaran {boolean} doReverse - do reverse mapping for each tag
            */
-          pub.addTagged = function(tagName, recordIds) {
+          pub.addTagged = function(tagName, recordIds, doReverse) {
+            if (doReverse === undefined) {
+              doReverse = true;
+            }
             //console.log('TAGS: addTagged('+tagName+'/'+_.docType+'):',recordIds);
             recordIds = _.ensureArray(recordIds);
 
@@ -132,15 +136,19 @@ define(['rs/remoteStorage'], function(remoteStorage) {
               var unique_obj = _.mergeAndUnique(recordIds, existingIds);
               console.log('ADD_TAGGED: '+tagName);
 
-              // add ids to tags reverse lookup document
-              return _.addReverse(tagName, recordIds).then(function() {
-                return privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, unique_obj);
-              });
+              if (doReverse) {
+                // add ids to tags reverse lookup document
+                return _.addReverse(tagName, recordIds).then(function() {
+                  return privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, unique_obj);
+                });
+              } else {
+                  return privateClient.storeObject('tag', 'names/'+tagName+'/'+_.docType, unique_obj);
+              }
             });
           };
 
           /**
-           * adds a list of tags for an id
+           * adds a list of tags to an id
            * @params {string} recordId - record ID
            * @params {array}  tagNames -list og tag names
            */
@@ -148,7 +156,9 @@ define(['rs/remoteStorage'], function(remoteStorage) {
             //console.log('TAGS: addTagsToRecord: ', tagNames);
             return asyncEach(_.ensureArray(tagNames), function(tagName) {
               console.log("ADDING: "+tagName+' rid:'+recordId);
-              return pub.addTagged(tagName, recordId);
+              return pub.addTagged(tagName, recordId, false);
+            }).then(function() {
+                return _.addReverse(tagNames, recordId);
             });
           };
 

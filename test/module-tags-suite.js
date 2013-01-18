@@ -182,7 +182,7 @@ suites.push({
       }
     },
     {
-      desc: "checking addTagsByRecord",
+      desc: "checking addTagsToRecord",
       run: function(env, test) {
         return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
           return env.tagModule.addTagsToRecord('dog2', ['brown', 'little pup']);
@@ -192,18 +192,26 @@ suites.push({
           });
         });
       }
+    },
+    {
+      desc: "removeTagged should remove recordID from a tag",
+        run: function(env) {
+          env.tagModule.removeTagged('travel', '67890');
+          var d = env.tagModule.getTagged('travel');
+          this.assert(d, ['12345']);
+          return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+            return env.tagModule.addTagsToRecord('dog2', ['brown', 'little pup']);
+          }).then(function (result) {
+            return env.tagModule.removeTagged('dog2', 'brown');
+          }).then(function (result) {
+            return env.tagModule.getTagsByRecord('dog2').then(function (result) {
+              test.assert(result, ['dog', 'little pup']);
+            });
+          });
+        }
     }
+
 /*
-        {
-            desc: "addTagsToRecord should add a list of tags to a recordId",
-            run: function(env) {
-                env.tagModule.addTagsToRecord(['67890', '12345'], ['penguin', 'travel']);
-                var d = env.tagModule.getTagsByRecord('67890');
-                env.presets.getTagsByRecord.push('penguin');
-                env.presets.getTagsByRecord.push('travel');
-                this.assert(d, env.presets.getTagsByRecord);
-            }
-        },
         {
             desc: "removeTagged should remove recordID from a tag",
             run: function(env) {
