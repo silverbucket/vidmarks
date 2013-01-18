@@ -2,10 +2,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
-//global.localStorage = require('localStorage');
-
 define(['rs/remoteStorage'], function(remoteStorage) {
-
   var curry = remoteStorage.util.curry;
   var asyncEach = remoteStorage.util.asyncEach;
 
@@ -118,7 +115,7 @@ define(['rs/remoteStorage'], function(remoteStorage) {
             return privateClient.getObject('names/'+tagName+'/'+_.docType).then(function (result) {
               var existingIds = _.ensureArray(result);
               var unique_obj = _.mergeAndUnique(recordIds, existingIds);
-              console.log('ADD_TAGGED: '+tagName);
+              //console.log('ADD_TAGGED: '+tagName);
 
               if (doReverse) {
                 // add ids to tags reverse lookup document
@@ -139,7 +136,7 @@ define(['rs/remoteStorage'], function(remoteStorage) {
           pub.addTagsToRecord = function(recordId, tagNames) {
             //console.log('TAGS: addTagsToRecord: ', tagNames);
             return asyncEach(_.ensureArray(tagNames), function(tagName) {
-              console.log("ADDING: "+tagName+' rid:'+recordId);
+              //console.log("ADDING: "+tagName+' rid:'+recordId);
               return pub.addTagged(tagName, recordId, false);
             }).then(function() {
                 return _.addReverse(tagNames, recordId);

@@ -25,6 +25,28 @@ suites.push({
         'visit_url': 'http://youtube.com/watch?v=098765',
         'source': 'youtube',
         'content_type': 'application/x-shockwave-flash'
+      },
+      blue : {
+        'title': 'blue',
+        'description': 'things that are blue',
+        'embed_url': 'http://youtube.com/lalal.swf',
+        'thumbnail': 'http://youtube.com/lalal.png',
+        'duration': 423,
+        'vid_id': '123456',
+        'visit_url': 'http://youtube.com/watch?v=123456',
+        'source': 'youtube',
+        'content_type': 'application/x-shockwave-flash'
+      },
+      invalid : {
+        'title': 'invalid',
+        'description': 'invalid record',
+        'embed_url': 'http://youtube.com/lalal.swf',
+        'thumbnail': 'http://youtube.com/lalal.png',
+        'duration': "423", // should be a number
+        'vid_id': '5555',
+        'visit_url': 'http://youtube.com/watch?v=5555',
+        'source': 'youtube',
+        'content_type': 'application/x-shockwave-flash'
       }
     };
     requirejs([
@@ -123,82 +145,29 @@ suites.push({
           });
         });
       }
+    },
+    {
+      desc: "getIds should return our list of video ids",
+      run: function(env, test) {
+        return env.vidModule.add(env.records.dogsandbacon, '098765a').then(function (result) {
+          return env.vidModule.add(env.records.blue, '123456');
+        }).then(function (result) {
+          return env.vidModule.getIds().then(function (result) {
+            test.assert(result, ['098765a','123456']);
+          });
+        });
+      }
+    },
+    {
+      desc: "lets submit an invalid record",
+      run: function(env, test) {
+        return env.vidModule.add(env.records.invalid, '5555').then(function (result) {
+          test.result(false, 'sucessfully submitted invalid schema!?');
+        }, function (err) {
+          test.result(true);
+        });
+      }
     }
-/*    {
-      desc: "getIds should return our preset list of video ids",
-      run: function(env) {
-        var d = env.vidModule.getIds();
-        var should_be = ['12345', 'abcde'];
-        this.assert(d, should_be);
-      }
-    },
-    {
-      desc: "get should return an object",
-      run: function(env) {
-        var d = env.vidModule.get('12345');
-        var should_be = {
-          'title': 'lolcats',
-          'description': 'lolcat video compilation',
-          'embed_url': 'http://youtube.com/yasysy.swf',
-          'thumbnail': 'http://youtube.com/yasysy.png',
-          'duration': 192,
-          'vid_id': 'yasysy',
-          'visit_url': 'http://youtube.com/watch?v=yasysy',
-          'source': 'youtube',
-          'content_type': 'application/x-shockwave-flash'
-        };
-        this.assert(d, should_be);
-      }
-    },
-    {
-      desc: "add should add a new record",
-      run: function(env) {
-        var new_record = {
-          'title': 'dogs and bacon',
-          'description': 'dogs love bacon',
-          'embed_url': 'http://youtube.com/098765.swf',
-          'thumbnail': 'http://youtube.com/098765.png',
-          'duration': 781,
-          'vid_id': '098765a',
-          'visit_url': 'http://youtube.com/watch?v=098765',
-          'source': 'youtube',
-          'content_type': 'application/x-shockwave-flash'
-        };
-        env.vidModule.on('error', function(err) {
-          console.log('DB ERROR: videos (teste) - ',err);
-        });
-        var id = env.vidModule.add(new_record, '098765a');
-
-        var retrieve = env.vidModule.get('098765a');
-        this.assert(new_record, retrieve);
-      }
-    },
-    {
-      desc: "lets add a record with an invalid schema",
-      willFail: true,
-      run: function(env) {
-        var new_record = {
-          'title': 'dogs and bacon',
-          'description': 'dogs love bacon',
-          'embed_url': 'http://youtube.com/098765.swf',
-          'thumbnail': 'http://youtube.com/098765.png',
-          'duration': "781", // should be a number
-          'vid_id': '098765',
-          'visit_url': 'http://youtube.com/watch?v=098765',
-          'source': 'youtube',
-          'content_type': 'application/x-shockwave-flash'
-        };
-
-        env.vidModule.on('error', function(err) {
-          console.log('DB ERROR: videos (teste) - '+err);
-        });
-
-        var id = env.vidModule.add(new_record, '098765');
-
-        var retrieve = env.vidModule.get('098765');
-        this.assert(new_record, retrieve);
-      }
-    }*/
   ]
 });
 
