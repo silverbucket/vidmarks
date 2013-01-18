@@ -10,12 +10,12 @@ define(function(require) {
   pub.init = function() {
     console.log('Vidmarks being inited');
     //_.util = net.silverbucket.vidmarks.utilityFunctions;
-    var plugins = require('plugins');
-    _.nav = require('vidmarks/nav');
+    var plugins = require('js/plugins');
+    _.nav = require('js/vidmarks/nav');
     _.nav.init(['list']);//, 'submit']);
     _.nav.toggle('list');
-    _.vidAPI = require('video_site_api');
-    _.db = require('vidmarks/dbmodel');
+    _.vidAPI = require('js/video_site_api');
+    _.db = require('js/vidmarks/dbmodel');
     _.db.init();
 
     _.db.onAction('change', function(event) {
