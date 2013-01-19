@@ -4,7 +4,10 @@
  * requires: jQuery
  */
 //define([], function(require) {
-define(['rs/remoteStorage', 'js/plugins', 'js/vidmarks/nav', 'js/video_site_api', 'js/vidmarks/dbmodel'], function(remoteStorage, plugins, nav, vidAPI, db) {
+define(['rs/remoteStorage', 'js/plugins',
+        'js/vidmarks/nav', 'js/video_site_api',
+        'js/vidmarks/dbmodel'],
+        function(remoteStorage, plugins, nav, vidAPI, db) {
   var pub = {};
   var _ = {};
 
@@ -172,7 +175,7 @@ define(['rs/remoteStorage', 'js/plugins', 'js/vidmarks/nav', 'js/video_site_api'
       return false;
     }
 
-    db.setCache('video', details); // cache the details in case of save
+    db.setCache('video', details['vid_id'], details); // cache the details in case of save
     db.addVidmark(record_id).then(function () {
       $('#message').html('<p class="success">video saved!</p>');
 

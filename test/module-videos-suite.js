@@ -65,7 +65,6 @@ suites.push({
       env.sync = sync;
       env.client = root;
 
-
       // if we loaded the tag module correctly, it should have returned
       // a function for us to use.
       test.assertTypeAnd(moduleImport, 'object');
@@ -89,7 +88,7 @@ suites.push({
   beforeEach: function (env, test) {
     // BEFORE EACH TEST
     env.serverHelper.resetState();
-    env.serverHelper.setScope([':rw']);
+    env.serverHelper.setScope(['videos:rw']);
 
     env.rsConnect = function() {
       env.remoteStorage.nodeConnect.setStorageInfo(
@@ -98,7 +97,7 @@ suites.push({
       env.remoteStorage.nodeConnect.setBearerToken(
         env.serverHelper.getBearerToken()
       );
-      return env.remoteStorage.claimAccess('root', 'rw');
+      return env.remoteStorage.claimAccess('videos', 'rw');
     };
     env.rsConnect().then(function() {
       test.result(true);

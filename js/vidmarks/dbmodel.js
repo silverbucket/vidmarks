@@ -12,49 +12,56 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
   _.doc_type = 'videos';
   _.cache = {};
 
-  pub.init = function() {
+  pub.init = function(noUI) {
     console.log('- DB: init()');
     //remoteStorage.util.setLogLevel('debug');
-    remoteStorage.claimAccess({ 'videos': 'rw', 'tags': 'rw' }).
+    return remoteStorage.claimAccess({ 'videos': 'rw', 'tags': 'rw' }).
       then(function() {
-        remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
-
+        if (!noUI) {
+          remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
+        }
         // FOR DEBUGGING:
         remoteStorage.schedule.disable();
+
+      _.modules.videos    = remoteStorage.videos;
+      _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
+
+      // testing events, changing, behavior
+      _.modules.videos.on('error', function(err) {
+        console.log('DB ERROR: videos - '+err);
       });
 
-    _.modules.videos    = remoteStorage.videos;
-    _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
+      // if a video is deleted, we need to remove tag references to it.
+      _.modules.videos.on('change', function(event) {
+        console.log('DB CHANGE: videos on(change) fired. :', event);
 
-    // testing events, changing, behavior
-    _.modules.videos.on('error', function(err) {
-      console.log('DB ERROR: videos - '+err);
+        if (event.origin === 'window') {
+          console.log(' -- origin window');
+        }
+
+        if ((typeof event.newValue === "object") && (typeof event.oldValue === "object")) {
+          //updateBookmarkRow(event.path, event.newValue);
+        } else if (typeof event.newValue === "object") {
+          //addBookmarkRow(event.path, event.newValue);
+        } else if (event.oldValue !== undefined) {
+          _.modules.tags.removeRecord(event.oldValue.source+'_'+event.oldValue.vid_id);
+        }
+      });
+
+      _.modules.tags.on('error', function(err) {
+        console.log('DB ERROR: tags - '+err);
+      });
+
+      _.modules.tags.on('change', function(obj) {
+        console.log('DB CHANGE: tags on(change) fired.');
+        console.log(obj);
+        if (obj.origin === 'window') {
+          console.log(' -- origin window');
+        }
+      });
+
     });
 
-    // if a video is deleted, we need to remove tag references to it.
-    _.modules.videos.on('change', function(event) {
-      console.log('DB CHANGE: videos on(change) fired. :', event);
-      if ((typeof event.newValue === "object") && (typeof event.oldValue === "object")) {
-        //updateBookmarkRow(event.path, event.newValue);
-      } else if (typeof event.newValue === "object") {
-        //addBookmarkRow(event.path, event.newValue);
-      } else if (event.oldValue !== undefined) {
-        _.modules.tags.removeRecord(event.oldValue.source+'_'+event.oldValue.vid_id);
-      }
-    });
-
-    _.modules.tags.on('error', function(err) {
-      console.log('DB ERROR: tags - '+err);
-    });
-
-    _.modules.tags.on('change', function(obj) {
-      console.log('DB CHANGE: tags on(change) fired.');
-      console.log(obj);
-      if (obj.origin === 'window') {
-        //
-        console.log(' -- origin window, do nothing');
-      }
-    });
   };
 
   pub.onAction = function(action, func) {
@@ -64,15 +71,23 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
   };
 
   // set a temp cache of video details, used for saving in the addVidmark function
-  pub.setCache = function(category, details) {
-    console.log('setCache('+category+')', details);
-    _.cache[category] = details;
+  pub.setCache = function(category, key, details) {
+    console.log('setCache('+category+') '+key+': ', details);
+    /*if (!_.cache[category]) {
+      _.cache[category] = {};
+    }*/
+    // only keep one record/tag combo in cash at a time, but we still organize
+    // by key so that we dont accidently save records we did not intend
+    _.cache[category] = {};
+    _.cache[category][key] = details;
+
   };
 
-  pub.getCache = function(category) {
+  pub.getCache = function(category, key) {
     var results = [];
-    if (_.cache[category]) {
-      results = _.cache[category];
+    if ((_.cache[category]) &&
+        (_.cache[category][key])) {
+      results = _.cache[category][key];
     }
     return results;
   };
@@ -84,31 +99,28 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
   };
 
   pub.getUsedTags = function() {
-    return _.modules.tags.getAllTags().then(function(tags) {
+    return remoteStorage.util.asyncGroup(pub.getAll, pub.getAllTags).then(function(results) {
+      var vidmarks = results[0];
+      var tags = results[1];
       var used_tags = [];
-      var vidmarks = pub.getAll();
-
       return remoteStorage.util.asyncEach(tags, function(tag) {
-        return _.modules.tags.getTagged(tag).then(function(tagRecords) {
-          var count = 0;
-          var num_tagRecords = tagRecords.length;
-          for (var j = 0; j < num_tagRecords; j++) {
-            /*if (!vidmarks[tagRecords[j]]) {
-              //console.log('DB_getTagCounts - remove record['+tags[i]+'] from tag');
-              _.modules.tags.removeTagged(tag, tagRecords[j]);
-            } else {*/
-              //console.log('DB_getTagCounts - add count for record ['+tags[i]+']');
+        return _.modules.tags.getTagged(tag).then(function(records) {
+          var num_records = records.length;
+          for (var j = 0; j < num_records; j++) {
+            if (!vidmarks[records[j]]) {
+              console.log('DB_getTagCounts - CAUGHT invalid record, use to remove! - tag['+tag+'] record['+records[j]+']');
+              //_.modules.tags.removeTagged(tag, tagRecords[j]);
+            } else {
+              console.log('DB_getTagCounts - add count for record ['+tag+']');
               used_tags.push(tag);
-            //}
+            }
           }
         });
       }).then(function(result, errors) {
         console.log('getUsedTags() ERRORS', errors);
         return used_tags;
       });
-
     });
-
   };
 
   pub.getTagCounts = function() {
@@ -141,12 +153,14 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
   };
 
   pub.addVidmark = function(vidmark_id) {
+    console.log('addVidmark : '+vidmark_id);
     if (!_.cache) {
       console.log('CACHE not set, cannot save');
       return false;
     }
-    var details = pub.getCache('video');
-    var tags = pub.getCache('tags');
+    var details = pub.getCache('video', vidmark_id);
+    console.log('cache details: ', _.cache);
+    var tags = pub.getCache('tags', vidmark_id);
     //console.log('** ADVIDMARK:',details);
     var cache_id = details.source+'_'+details.vid_id;
     if (vidmark_id === cache_id) {
@@ -155,7 +169,7 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
         function() { return _.modules.videos.add(details, cache_id); },
         function() { return _.modules.tags.addTagsToRecord(cache_id, tags); }
       ).then(function (_, errors) {
-        console.log('addVidmark() ERRORS: ', errors);
+        console.log('DB: addVidmark() ERRORS: ', errors);
       });
     } else {
       console.log('IDs do not match ['+vidmark_id+' = '+cache_id+']');
@@ -195,6 +209,7 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
         });
       }).then(function (_, errors) {
         console.log('getAll() ERRORS: ', errors);
+        //console.log('getAll() RETURN: ', all);
         return all;
       });
     });
