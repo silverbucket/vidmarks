@@ -25,7 +25,7 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
 
       _.modules.videos    = remoteStorage.videos;
       _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
-
+/*
       // testing events, changing, behavior
       _.modules.videos.on('error', function(err) {
         console.log('DB ERROR: videos - '+err);
@@ -59,7 +59,7 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
           console.log(' -- origin window');
         }
       });
-
+*/
     });
 
   };
@@ -103,8 +103,11 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
       var vidmarks = results[0];
       var tags = results[1];
       var used_tags = [];
+          console.log('*** vidmarks: ', vidmarks);
+          console.log('*** tags: ', tags);
       return remoteStorage.util.asyncEach(tags, function(tag) {
         return _.modules.tags.getTagged(tag).then(function(records) {
+          console.log('*** records: ', records);
           var num_records = records.length;
           for (var j = 0; j < num_records; j++) {
             if (!vidmarks[records[j]]) {
@@ -144,12 +147,13 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
     });
   };
 
-  pub.addTagsToRecord = function(recordId, tagNames, completedFunc) {
-    _.modules.tags.addTagsToRecord(recordId, tagNames).then(completedFunc);
-  };
+  //pub.addTagsToRecord = function(recordId, tagNames) {
+  //  return _.modules.tags.addTagsToRecord(recordId, tagNames); //.then(completedFunc);
+  //};
 
-  pub.updateTagsForRecord = function(recordId, tagNames, completedFunc) {
-    _.modules.tags.updateTagsForRecord(recordId, tagNames).then(completedFunc);
+  pub.updateTagsForRecord = function(recordId, tagNames) {
+    //console.log('DB: updateTagsForRecord()');
+    return _.modules.tags.updateTagsForRecord(recordId, tagNames); //.then(completedFunc);
   };
 
   pub.addVidmark = function(vidmark_id) {

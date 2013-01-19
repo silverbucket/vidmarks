@@ -206,6 +206,27 @@ suites.push({
           });
         });
       }
+    },
+    {
+      desc: "db.updateTagsForRecord",
+      run: function(env, test) {
+        var record_id_blue = env.records.blue.source+'_'+env.records.blue.vid_id;
+        return env.db.init(true).then(function() {
+          env.db.setCache('video', record_id_blue, env.records.blue);
+          env.db.setCache('tags', record_id_blue, ['tagone', 'tagtwo', 'tagthree']);
+          return env.db.addVidmark(record_id_blue);
+        }).then(function() {
+          return env.db.updateTagsForRecord(record_id_blue, ['tagone', 'blue']);
+        }).then(function() {
+          return env.db.getTagsByRecord(record_id_blue).then(function (tags) {
+            console.log('TEST: getTagsByRecord: tags:', tags);
+            test.assert(tags, ['tagone', 'blue']);
+          }, function (err) {
+            console.log('TEST: getUsedTags:ERROR', err);
+            test.result(false, 'TEST: getUsedTags test error: '+err);
+          });
+        });
+      }
     }
     /*{
       desc: "getTagsByRecord should return 'dog' in list of tag names",

@@ -387,6 +387,11 @@ define('lib/util',[], function() {
     btoa = window.btoa;
   }
 
+  var Warning = function() {
+    Error.apply(this, arguments);
+  };
+  Warning.prototype = Error.prototype;
+
   var Promise = function(chained) {
     this.result = undefined;
     this.success = undefined;
@@ -433,8 +438,8 @@ define('lib/util',[], function() {
     fulfill: function() {
       if(typeof(this.success) !== 'undefined') {
         console.error("Fulfillment value: ", arguments);
-        throw new Error("Can't fulfill promise, already resolved as: " +
-                        (this.success ? 'fulfilled' : 'failed'));
+        throw new Warning("Can't fulfill promise, already resolved as: " +
+                          (this.success ? 'fulfilled' : 'failed'));
       }
       //BEGIN-DEBUG
       clearTimeout(this.debugTimer);
@@ -1547,7 +1552,7 @@ define('lib/platform',['./util'], function(util) {
         if(timer) {
           clearTimeout(timer);
         }
-        promise.fail(e.message);
+        promise.fail(e && e.message);
       });
       if(params.data) {
         request.end(params.data);
@@ -1860,7 +1865,7 @@ define('lib/getputdelete',
 
     function realDoCall(method, url, body, mimeType, token) {
       return util.makePromise(function(promise) {
-        logger.info(method, url, body);
+        logger.info(method, url);
         var platformObj = {
           url: url,
           method: method,
@@ -1886,7 +1891,7 @@ define('lib/getputdelete',
         platform.ajax(platformObj).
           then(function(data, headers) {
             var contentType = headers['content-type'] || defaultContentType;
-            var mimeType = contentType.split(';')[0];
+            var mimeType = contentType.split(';')[0]
 
             if(contentType.match(/charset=binary/)) {
               data = util.rawToBuffer(data);
@@ -1898,7 +1903,7 @@ define('lib/getputdelete',
               }
             }
 
-            promise.fulfill(data, mimeType);
+            promise.fulfill(data, mimeType);            
           }, function(error) {
             if(error === 404) {
               return promise.fulfill(undefined);
@@ -1950,8 +1955,7 @@ define('lib/getputdelete',
     function put(url, value, mimeType, token) {
       if(! (typeof(value) === 'string' || (typeof(value) === 'object' &&
                                            value instanceof ArrayBuffer))) {
-        cb(new Error("invalid value given to PUT, only strings or ArrayBuffers allowed, got "
-                     + typeof(value)));
+        throw new Error("invalid value given to PUT, only strings or ArrayBuffers allowed, got " + typeof(value));
       }
       return doCall('PUT', url, value, mimeType, token);
     }
@@ -3222,7 +3226,7 @@ define('lib/store',[
     }
 
     function fireEvents() {
-      if((! outgoing) && (! util.isDir(path))) {
+      if((!meta) && (! outgoing) && (! util.isDir(path))) {
         // fire changes
         if(isForeign(path)) {
           return fireForeignChange(path, oldValue);
@@ -5013,8 +5017,10 @@ define('lib/baseClient',[
     var moduleName = extractModuleName(event.path);
     // remote-based changes get fired from the store.
     fireModuleEvent('change', moduleName, event);
-    // root module gets everything
-    fireModuleEvent('change', 'root', event);
+    if(moduleName !== 'root') {
+      // root module gets everything
+      fireModuleEvent('change', 'root', event);
+    }
   });
 
   sync.on('conflict', function(event) {
@@ -5052,7 +5058,9 @@ define('lib/baseClient',[
         return store.setNodeData(absPath, value, true, undefined, mimeType);
       }).then(function() {
         fireModuleEvent('change', moduleName, changeEvent);
-        fireModuleEvent('change', 'root', changeEvent);
+        if(moduleName !== 'root') {
+          fireModuleEvent('change', 'root', changeEvent);
+        }
       });
   }
 
@@ -6689,7 +6697,9 @@ define('lib/widget',[
     settings.set('userAddress', userAddress);
     setState('authing');
     return webfinger.getStorageInfo(userAddress).
-      then(wireClient.setStorageInfo, util.curry(setState, 'typing')).
+      then(wireClient.setStorageInfo, function(error) {
+        setState((typeof(error) === 'string') ? 'typing' : 'error', error);
+      }).
       get('properties').get('auth-endpoint').
       then(requestToken).
       then(schedule.enable, util.curry(setState, 'error'));
@@ -7407,8 +7417,6 @@ define('remoteStorage',[
     // Parameters:
     //   domID - DOM ID of element to attach widget elements to
     //   options - Options, as described below.
-    //   options.authDialog - Strategy to display OAuth dialog. Either 'redirect', 'popup' or a function. Defaults to 'redirect'. If this is a function, that function will receive the URL of the auth dialog. The OAuth dance will redirect back to the current location, with an access token, so that must be possible.
-    //   options.syncShortcut - Whether to setup CTRL+S as a shortcut for immediate sync. Default is true.
     //   options.locale - Locale to use for the widget. Currently ignored.
     //
     // Minimal Example:
@@ -7419,15 +7427,7 @@ define('remoteStorage',[
     //    *in the app's JS*
     //    > remoteStorage.displayWidget('remotestorage-connect');
     //
-    //    Once you're connected, press CTRL+S to observe the spinning cube :)
-    //
     //    *Note* that in real life you would have to call <claimAccess> before calling displayWidget. Otherwise you can't access any actual data.
-    //
-    // Popup Example:
-    //
-    //    (using the same markup as above)
-    //
-    //    > remoteStorage.displayWidget('remotestorage-connect', { authDialog: 'popup' });
     //
     displayWidget: function(domId, options) {
       widget.display(remoteStorage, domId, util.extend({}, options));

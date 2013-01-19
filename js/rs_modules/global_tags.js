@@ -85,8 +85,8 @@ define(['rs/remoteStorage'], function(remoteStorage) {
            * @param {string} tagName - the name of the tag
            * @returns {array}
            */
-          pub.getTagged = function(tagName) {
-            //console.log('TAGS: getTagged('+tagName+'/'+_.docType+')');
+          pub.getRecordsWithTag = function(tagName) {
+            console.log('TAGS: getRecordsWithTag('+tagName+'/'+_.docType+')');
             return privateClient.getObject('names/'+tagName+'/'+_.docType).
               then(function(obj) {
                 var return_val = [];
@@ -134,7 +134,7 @@ define(['rs/remoteStorage'], function(remoteStorage) {
            * @params {array}  tagNames -list og tag names
            */
           pub.addTagsToRecord = function(recordId, tagNames) {
-            //console.log('TAGS: addTagsToRecord: ', tagNames);
+            console.log('TAGS: addTagsToRecord: ', tagNames);
             return asyncEach(_.ensureArray(tagNames), function(tagName) {
               //console.log("ADDING: "+tagName+' rid:'+recordId);
               return pub.addTagged(tagName, recordId, false);
@@ -149,7 +149,7 @@ define(['rs/remoteStorage'], function(remoteStorage) {
            * @params {array}  tagNames -list og tag names
            */
           pub.updateTagsForRecord = function(recordId, tagNames) {
-            //console.log('TAGS: addTagsToRecord: ', tagNames);
+            //console.log('TAGS: updateTagsForRecord: '+recordId+': ', tagNames);
             return pub.removeRecord(recordId).
               then(curry(pub.addTagsToRecord, recordId, tagNames));
           };
@@ -160,11 +160,11 @@ define(['rs/remoteStorage'], function(remoteStorage) {
            * @param {array|string} id(s) of record to remove from list
            */
           pub.removeTagged = function(tagName, recordIds) {
-            //console.log('TAGS: removeTagged('+tagName+', '+recordIds+')');
+            console.log('TAGS: removeTagged('+tagName+', '+recordIds+')');
             recordIds = _.ensureArray(recordIds);
 
             // get object for this tag
-            return pub.getTagged(tagName).
+            return pub.getRecordsWithTag(tagName).
               then(function(existingIds) {
 
                 // remove all occurences of appId(s) from existingIds list
@@ -194,11 +194,20 @@ define(['rs/remoteStorage'], function(remoteStorage) {
            * @params {string} recordId - record ID
            */
           pub.removeRecord = function(recordId) {
-            //console.log('TAGS: removeRecord()');
+            console.log('**************** TAGS: removeRecord('+recordId+')');
             return pub.getTagsByRecord(recordId).
               then(function(tagList) {
-                return asyncEach(tagList, function(tag) {
-                  return pub.removeTagged(tag, recordId);
+                return remoteStorage.util.makePromise(function(promise) {
+                  function removeOne() {
+                    var tag = tagList.shift();
+                    if(tag) {
+                      console.log('REMOVE '+recordId+' from tag '+tag);
+                      pub.removeTagged(tag, recordId).then(removeOne);
+                    } else {
+                      promise.fulfill();
+                    }
+                  }
+                  removeOne();
                 });
               });
           };

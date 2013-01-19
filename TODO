@@ -1,0 +1,9 @@
+[-] create a tags function to remove unassociated tags -- which is defined by a
+tag that has no records associated with it in any of the scopes. To do this, the
+following needs to happen:
+  - when there are no more records in the tags scope, the scope file needs to
+  be removed. So if names/my_tag/videos is empty, then videos should be
+  deleted.
+  - then the cleanup function can check for no files in a tag names dir, if
+  there are none, then delete the tag name dir.
+

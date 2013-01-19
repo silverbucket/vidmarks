@@ -134,10 +134,46 @@ suites.push({
       }
     },
     {
-      desc: "getTagged should return dog1,2,3 for the tag 'dog'",
+      desc: "getTagsByRecord should return 'dog' 'little puppy' and 'brown' list of tag names",
       run: function(env, test) {
         return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
-          return env.tagModule.getTagged('dog').then(function (result) {
+          return env.tagModule.addTagged('brown', ['dog1']);
+        }).then(function (result) {
+          return env.tagModule.addTagged('little pup', ['dog1']);
+        }).then(function (result) {
+          return env.tagModule.getTagsByRecord('dog1').then(function (result) {
+            test.assert(result, ['dog', 'brown', 'little pup']);
+          });
+        });
+      }
+    },
+    {
+      desc: "addTagsToRecord",
+      run: function(env, test) {
+        return env.tagModule.addTagsToRecord('dog1', ['little','brown','puppy']).then(function (result) {
+          return env.tagModule.getTagsByRecord('dog1');
+        }).then(function (tags) {
+          test.assert(tags, ['little','brown','puppy']);
+        });
+      }
+    },
+    {
+      desc: "updateTagsForRecord should remove tags not specified",
+      run: function(env, test) {
+        return env.tagModule.addTagsToRecord('dog1', ['little','brown','puppy']).then(function (result) {
+          return env.tagModule.updateTagsForRecord('dog1', ['brown', 'adult']);
+        }).then(function () {
+          return env.tagModule.getTagsByRecord('dog1').then(function (result) {
+            test.assert(result, ['brown', 'adult']);
+          });
+        });
+      }
+    },
+    {
+      desc: "getRecordsWithTag should return dog1,2,3 for the tag 'dog'",
+      run: function(env, test) {
+        return env.tagModule.addTagged('dog', ['dog1','dog2','dog3']).then(function (result) {
+          return env.tagModule.getRecordsWithTag('dog').then(function (result) {
             test.assert(result, ['dog1', 'dog2', 'dog3']);
           });
         });
@@ -177,7 +213,7 @@ suites.push({
         }).then(function (result) {
           return env.tagModule.removeTagged('brown', 'dog2');
         }).then(function (result) {
-          return env.tagModule.getTagged('brown');
+          return env.tagModule.getRecordsWithTag('brown');
         }).then(function (result) {
           test.assert(result, ['dog1', 'dog3']);
         });
@@ -191,7 +227,7 @@ suites.push({
         }).then(function (result) {
           return env.tagModule.removeRecord('dog2');
         }).then(function (result) {
-          return env.tagModule.getTagged('brown');
+          return env.tagModule.getRecordsWithTag('brown');
         }).then(function (result) {
           test.assert(result, ['dog1', 'dog3']);
         });

@@ -103,9 +103,10 @@ define(['rs/remoteStorage', 'js/plugins',
           var id = $(this).parent().parent().attr('id');
           console.log('ENTER was pressed tag field ['+id+']');
           var tag_list = _.getInputTags(id);
-          db.updateTagsForRecord(id, tag_list, function() {
-                _.updateTagStatus(id, 'tags updated!');
-              });
+          _.updateTagStatus(id, '... updating tags...');
+          db.updateTagsForRecord(id, tag_list).then(function() {
+            return _.updateTagStatus(id, 'tags updated!');
+          });
           pub.displayTagList(); // update tags list
           e.preventDefault();
           return false;
@@ -177,6 +178,7 @@ define(['rs/remoteStorage', 'js/plugins',
     }
 
     db.setCache('video', details['vid_id'], details); // cache the details in case of save
+
     db.addVidmark(record_id).then(function () {
       $('#message').html('<p class="success">video saved!</p>');
 
