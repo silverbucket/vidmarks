@@ -52,6 +52,7 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
       console.log(obj);
       if (obj.origin === 'window') {
         //
+        console.log(' -- origin window, do nothing');
       }
     });
   };
