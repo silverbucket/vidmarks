@@ -106,7 +106,7 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
           console.log('*** vidmarks: ', vidmarks);
           console.log('*** tags: ', tags);
       return remoteStorage.util.asyncEach(tags, function(tag) {
-        return _.modules.tags.getTagged(tag).then(function(records) {
+        return _.modules.tags.getRecordsWithTag(tag).then(function(records) {
           console.log('*** records: ', records);
           var num_records = records.length;
           for (var j = 0; j < num_records; j++) {
@@ -130,7 +130,7 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
     return pub.getUsedTags().then(function(tags) {
       var r_struct = {};
       return remoteStorage.util.asyncEach(tags, function (tag) {
-        return _.modules.tags.getTagged(tag).then(function(tagRecords) {
+        return _.modules.tags.getRecordsWithTag(tag).then(function(tagRecords) {
           r_struct[tag] = tagRecords.length; //tag_recs.length;
         });
       }).then(function (result, errors) {
