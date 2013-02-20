@@ -81,7 +81,7 @@ suites.push({
     });
 
   },
-  timeout: 5000,
+  timeout: 15000,
   takedown: function(env, test) {
     env.serverHelper.stop(function() {
       test.result(true);
