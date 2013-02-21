@@ -52,7 +52,7 @@ define(['jsuri'], function(jsuri, undefined) {
 
   _.youtube.retrieveDetails = function(vid_id, successFunc) {
     $.ajax({
-      url: "http://gdata.youtube.com/feeds/api/videos/" + vid_id +
+      url: "https://gdata.youtube.com/feeds/api/videos/" + vid_id +
            "?v=2&alt=json",
       dataType: "jsonp",
       success: function (data) {
@@ -64,7 +64,7 @@ define(['jsuri'], function(jsuri, undefined) {
         details['thumbnail'] = data.entry.media$group.media$thumbnail[2].url;
         details['duration'] = +data.entry.media$group.yt$duration.seconds;
         details['vid_id'] = vid_id;
-        details['visit_url'] = 'http://youtube.com/watch?v='+vid_id;
+        details['visit_url'] = 'https://youtube.com/watch?v='+vid_id;
         details['source'] = 'youtube';
         details['content_type'] = data.entry.content.type;
         //details['video_data'] = '';
