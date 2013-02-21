@@ -163,7 +163,8 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
       return false;
     }
     var details = pub.getCache('video', vidmark_id);
-    console.log('cache details: ', _.cache);
+    console.log('cache: ', _.cache);
+    console.log('cache details: ', details);
     var tags = pub.getCache('tags', vidmark_id);
     //console.log('** ADVIDMARK:',details);
     var cache_id = details.source+'_'+details.vid_id;

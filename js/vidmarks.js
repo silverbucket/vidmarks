@@ -177,7 +177,7 @@ define(['rs/remoteStorage', 'js/plugins',
       return false;
     }
 
-    db.setCache('video', details['vid_id'], details); // cache the details in case of save
+    db.setCache('video', details['source']+'_'+details['vid_id'], details); // cache the details in case of save
 
     db.addVidmark(record_id).then(function () {
       $('#message').html('<p class="success">video saved!</p>');
