@@ -56,16 +56,14 @@ suites.push({
       'rs/remoteStorage',
       'rs/lib/store',
       'rs/lib/sync',
-      'rs/modules/root',
       'rs_base/test/helper/server',
       'rs_base/server/nodejs-example'
-    ], function(_util, remoteStorage, store, sync, root, serverHelper, nodejsExampleServer) {
+    ], function(_util, remoteStorage, store, sync, serverHelper, nodejsExampleServer) {
       util = _util;
       curry = util.curry;
       env.remoteStorage = remoteStorage;
       env.store = store;
       env.sync = sync;
-      env.client = root;
 
       // if we loaded the tag module correctly, it should have returned
       // a function for us to use.
@@ -93,10 +91,10 @@ suites.push({
     env.serverHelper.setScope(['tags:rw', 'videos:rw']);
 
     env.rsConnect = function() {
-      env.remoteStorage.nodeConnect.setStorageInfo(
+      env.remoteStorage.setStorageInfo(
         env.serverHelper.getStorageInfo()
       );
-      env.remoteStorage.nodeConnect.setBearerToken(
+      env.remoteStorage.setBearerToken(
         env.serverHelper.getBearerToken()
       );
       return env.remoteStorage.claimAccess({tags: 'rw', videos: 'rw'});

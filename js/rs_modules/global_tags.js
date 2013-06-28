@@ -197,7 +197,7 @@ define(['rs/remoteStorage'], function(remoteStorage) {
             console.log('**************** TAGS: removeRecord('+recordId+')');
             return pub.getTagsByRecord(recordId).
               then(function(tagList) {
-                return remoteStorage.util.makePromise(function(promise) {
+                return remoteStorage.util.getPromise(function(promise) {
                   function removeOne() {
                     var tag = tagList.shift();
                     if(tag) {

@@ -54,16 +54,15 @@ suites.push({
       'rs/remoteStorage',
       'rs/lib/store',
       'rs/lib/sync',
-      'rs/modules/root',
       'rs_base/test/helper/server',
       'rs_base/server/nodejs-example'
-    ], function(_util, remoteStorage, store, sync, root, serverHelper, nodejsExampleServer) {
+    ], function(_util, remoteStorage, store, sync, serverHelper, nodejsExampleServer) {
       util = _util;
       curry = util.curry;
       env.remoteStorage = remoteStorage;
       env.store = store;
       env.sync = sync;
-      env.client = root;
+      ///env.client = root;
 
       // if we loaded the tag module correctly, it should have returned
       // a function for us to use.
@@ -91,10 +90,10 @@ suites.push({
     env.serverHelper.setScope(['videos:rw']);
 
     env.rsConnect = function() {
-      env.remoteStorage.nodeConnect.setStorageInfo(
+      env.remoteStorage.setStorageInfo(
         env.serverHelper.getStorageInfo()
       );
-      env.remoteStorage.nodeConnect.setBearerToken(
+      env.remoteStorage.setBearerToken(
         env.serverHelper.getBearerToken()
       );
       return env.remoteStorage.claimAccess('videos', 'rw');
@@ -159,11 +158,15 @@ suites.push({
     },
     {
       desc: "lets submit an invalid record",
+      willFail: true,
       run: function(env, test) {
+        console.log('record: ', env.records.invalid);
         return env.vidModule.add(env.records.invalid, '5555').then(function (result) {
-          test.result(false, 'sucessfully submitted invalid schema!?');
+          console.log('returned true: ', result);
+          test.result(treu, 'sucessfully submitted invalid schema!?');
         }, function (err) {
-          test.result(true);
+          console.log('returned false: ', err);
+          test.result(false);
         });
       }
     }
