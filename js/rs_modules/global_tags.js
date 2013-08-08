@@ -2,7 +2,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
-define(['rs/remoteStorage'], function(remoteStorage) {
+define(['rs/remotestorage'], function(remoteStorage) {
   var curry = remoteStorage.util.curry;
   var asyncEach = remoteStorage.util.asyncEach;
 

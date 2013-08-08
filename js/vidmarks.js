@@ -4,7 +4,7 @@
  * requires: jQuery
  */
 //define([], function(require) {
-define(['rs/remoteStorage', 'js/plugins',
+define(['rs/remotestorage', 'js/plugins',
         'js/vidmarks/nav', 'js/video_site_api',
         'js/vidmarks/dbmodel'],
         function(remoteStorage, plugins, nav, vidAPI, db) {

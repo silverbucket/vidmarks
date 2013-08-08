@@ -3,7 +3,7 @@
  *
  * requires: remoteStorage.js
  */
-define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos'], function(remoteStorage, global_tags, videos) {
+define(['rs/remotestorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos'], function(remoteStorage, global_tags, videos) {
   var pub = {}; // public variable and functions container
   var _ = {}; // private variable and functions container
 

@@ -51,7 +51,7 @@ suites.push({
     };
     requirejs([
       'rs/lib/util',
-      'rs/remoteStorage',
+      'rs/remotestorage',
       'rs/lib/store',
       'rs/lib/sync',
       'rs_base/test/helper/server',
