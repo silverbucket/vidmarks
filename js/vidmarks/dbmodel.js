@@ -3,7 +3,7 @@
  *
  * requires: remoteStorage.js
  */
-define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos'], function(remoteStorage, global_tags, videos) {
+define(['rs/remotestorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos'], function(remoteStorage, global_tags, videos) {
   var pub = {}; // public variable and functions container
   var _ = {}; // private variable and functions container
 
@@ -15,53 +15,14 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
   pub.init = function(noUI) {
     console.log('- DB: init()');
     //remoteStorage.util.setLogLevel('debug');
-    return remoteStorage.claimAccess({ 'videos': 'rw', 'tags': 'rw' }).
-      then(function() {
-        if (!noUI) {
-          remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
-        }
-        // FOR DEBUGGING:
-        remoteStorage.schedule.disable();
+    remoteStorage.access.claim('videos', 'rw');
+    remoteStorage.access.claim('tags', 'rw');
+    if (!noUI) {
+      remoteStorage.displayWidget(); // after that (not before that) display widget
+    }
 
-      _.modules.videos    = remoteStorage.videos;
-      _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
-/*
-      // testing events, changing, behavior
-      _.modules.videos.on('error', function(err) {
-        console.log('DB ERROR: videos - '+err);
-      });
-
-      // if a video is deleted, we need to remove tag references to it.
-      _.modules.videos.on('change', function(event) {
-        console.log('DB CHANGE: videos on(change) fired. :', event);
-
-        if (event.origin === 'window') {
-          console.log(' -- origin window');
-        }
-
-        if ((typeof event.newValue === "object") && (typeof event.oldValue === "object")) {
-          //updateBookmarkRow(event.path, event.newValue);
-        } else if (typeof event.newValue === "object") {
-          //addBookmarkRow(event.path, event.newValue);
-        } else if (event.oldValue !== undefined) {
-          _.modules.tags.removeRecord(event.oldValue.source+'_'+event.oldValue.vid_id);
-        }
-      });
-
-      _.modules.tags.on('error', function(err) {
-        console.log('DB ERROR: tags - '+err);
-      });
-
-      _.modules.tags.on('change', function(obj) {
-        console.log('DB CHANGE: tags on(change) fired.');
-        console.log(obj);
-        if (obj.origin === 'window') {
-          console.log(' -- origin window');
-        }
-      });
-*/
-    });
-
+    _.modules.videos    = remoteStorage.videos;
+    _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
   };
 
   pub.onAction = function(action, func) {

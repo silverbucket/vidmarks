@@ -17,7 +17,7 @@ suites.push({
   setup: function(env, test) {
     requirejs([
       'rs/lib/util',
-      'rs/remoteStorage',
+      'rs/remotestorage',
       'rs/lib/store',
       'rs/lib/sync',
       'rs_base/test/helper/server',
