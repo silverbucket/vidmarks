@@ -15,129 +15,128 @@ define(['rs/remotestorage', 'js/plugins',
     console.log('Vidmarks being inited');
     nav.init(['list']);
     nav.toggle('list');
-    db.init().then(function() {
+    db.init();
 
-      db.onAction('change', function(event) {
-        console.log('DB.onAction EVENT: ', event);
-        if(event.newValue && event.oldValue) {
-          //updateBookmarkRow(event.path, event.newValue);
-        } else if(event.newValue) {
-          //addBookmarkRow(event.path, event.newValue);
-        } else if (event.oldValue !== undefined) {
-          console.log('remove vidmark entry called');
-          _.removeVidmarkEntry(event.oldValue.source+'_'+event.oldValue.vid_id);
-        }
-      });
-
-      /*
-       * navigation
-       */
-      $("a#link-submit").click(function() {
-        nav.toggle('submit');
-        return false;
-      });
-
-      $("a#link-list").click(function() {
-        nav.toggle('list');
-
-        pub.displayVidmarkList();
-
-        return false;
-      });
-      /* */
-
-      /*
-       * form controls
-       */
-      $("input#input_vid_url").bind('paste', function(event) {
-        var _this = this;
-        // Short pause to wait for paste to complete
-        setTimeout( function() {
-          var url = $(_this).val();
-          if (!vidAPI.retrieveDetails(url, pub.displayNewVidmark,
-                                        pub.displayErrorVidmark)) {
-            pub.displayMessage(vidAPI.getErrorMessage(), 'error');
-          }
-        }, 100);
-      });
-
-      $("#submit_url_form_area").on('keypress',
-                                    'input#input_vid_url', function (e) {
-        if (e.which == 13) {
-          var url = $(this).val();
-          if (!vidAPI.retrieveDetails(url, pub.displayNewVidmark,
-                                        pub.displayErrorVidmark)) {
-            pub.displayMessage(vidAPI.getErrorMessage(), 'error');
-          }
-          return false;
-        }
-      });
-
-      $("form#submit_url_form").validate({
-        //set the rules for the field names
-        rules: {
-          vid_url: {
-            minlength: 4,
-            url: true
-          }
-        },
-        //set messages to appear inline
-        messages: {
-          vid_url: ""
-        },
-        submitHandler: function(form) {
-          console.log('form submittion passed validation');
-          var url = $('#input_vid_url').val();
-          return db.addVidmark(url).then(function() {
-            $('#input_vid_url').val('');
-            return false;
-          });
-        }
-      });
-
-      // when you hit enter in the tag input field, we save the new tags
-      // using the jquery 'delegate' function ('on')
-      $("section#vidmarks").on('keypress', 'input.tag_list', function (e) {
-        if (e.which == 13) {
-          console.log(e);
-          var id = $(this).parent().parent().attr('id');
-          console.log('ENTER was pressed tag field ['+id+']');
-          var tag_list = _.getInputTags(id);
-          _.updateTagStatus(id, '... updating tags...');
-          db.updateTagsForRecord(id, tag_list).then(function() {
-            return _.updateTagStatus(id, 'tags updated!');
-          });
-          pub.displayTagList(); // update tags list
-          e.preventDefault();
-          return false;
-        }
-      });
-
-      // delete button
-      $("section#vidmarks").on('click', 'a.delete', function(e) {
-        var id = $(this).parent().parent().attr('id');
-        //console.log('id:'+id+' wants to be deleteded');
-        db.removeVidmark(id);
-        return false;
-      });
-
-      // auto tag suggestions
-      var timer;
-      $("section#vidmarks").on('keyup', 'input.tag_list', function(e) {
-        clearTimeout(timer);
-        var id = $(this).parent().parent().attr('id');
-        var currentTags = _.getInputTags(id);
-        timer = setTimeout(
-                    _.getTagSuggestions(currentTags[currentTags.length - 1]),
-                    300
-                  );
-      });
-
-      /* */
-
-      pub.displayTagList();
-      pub.displayVidmarkList();
+    db.onAction('change', function(event) {
+      console.log('DB.onAction EVENT: ', event);
+      if(event.newValue && event.oldValue) {
+        //updateBookmarkRow(event.path, event.newValue);
+      } else if(event.newValue) {
+        //addBookmarkRow(event.path, event.newValue);
+      } else if (event.oldValue !== undefined) {
+        console.log('remove vidmark entry called');
+        _.removeVidmarkEntry(event.oldValue.source+'_'+event.oldValue.vid_id);
+      }
     });
+
+    /*
+     * navigation
+     */
+    $("a#link-submit").click(function() {
+      nav.toggle('submit');
+      return false;
+    });
+
+    $("a#link-list").click(function() {
+      nav.toggle('list');
+
+      pub.displayVidmarkList();
+
+      return false;
+    });
+    /* */
+
+    /*
+     * form controls
+     */
+    $("input#input_vid_url").bind('paste', function(event) {
+      var _this = this;
+      // Short pause to wait for paste to complete
+      setTimeout( function() {
+        var url = $(_this).val();
+        if (!vidAPI.retrieveDetails(url, pub.displayNewVidmark,
+                                      pub.displayErrorVidmark)) {
+          pub.displayMessage(vidAPI.getErrorMessage(), 'error');
+        }
+      }, 100);
+    });
+
+    $("#submit_url_form_area").on('keypress',
+                                  'input#input_vid_url', function (e) {
+      if (e.which == 13) {
+        var url = $(this).val();
+        if (!vidAPI.retrieveDetails(url, pub.displayNewVidmark,
+                                      pub.displayErrorVidmark)) {
+          pub.displayMessage(vidAPI.getErrorMessage(), 'error');
+        }
+        return false;
+      }
+    });
+
+    $("form#submit_url_form").validate({
+      //set the rules for the field names
+      rules: {
+        vid_url: {
+          minlength: 4,
+          url: true
+        }
+      },
+      //set messages to appear inline
+      messages: {
+        vid_url: ""
+      },
+      submitHandler: function(form) {
+        console.log('form submittion passed validation');
+        var url = $('#input_vid_url').val();
+        return db.addVidmark(url).then(function() {
+          $('#input_vid_url').val('');
+          return false;
+        });
+      }
+    });
+
+    // when you hit enter in the tag input field, we save the new tags
+    // using the jquery 'delegate' function ('on')
+    $("section#vidmarks").on('keypress', 'input.tag_list', function (e) {
+      if (e.which == 13) {
+        console.log(e);
+        var id = $(this).parent().parent().attr('id');
+        console.log('ENTER was pressed tag field ['+id+']');
+        var tag_list = _.getInputTags(id);
+        _.updateTagStatus(id, '... updating tags...');
+        db.updateTagsForRecord(id, tag_list).then(function() {
+          return _.updateTagStatus(id, 'tags updated!');
+        });
+        pub.displayTagList(); // update tags list
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    // delete button
+    $("section#vidmarks").on('click', 'a.delete', function(e) {
+      var id = $(this).parent().parent().attr('id');
+      //console.log('id:'+id+' wants to be deleteded');
+      db.removeVidmark(id);
+      return false;
+    });
+
+    // auto tag suggestions
+    var timer;
+    $("section#vidmarks").on('keyup', 'input.tag_list', function(e) {
+      clearTimeout(timer);
+      var id = $(this).parent().parent().attr('id');
+      var currentTags = _.getInputTags(id);
+      timer = setTimeout(
+                  _.getTagSuggestions(currentTags[currentTags.length - 1]),
+                  300
+                );
+    });
+
+    /* */
+
+    pub.displayTagList();
+    pub.displayVidmarkList();
   };
 
   /*******************************/
