@@ -3,16 +3,17 @@ if (typeof define !== 'function') {
 }
 require.config({
   paths: {
-    rs: 'vendor/remoteStorage/src',
-    rs_base: 'vendor/remoteStorage'
+    rs: 'vendor',
+    bluebird: 'node_modules/bluebird/js'
   }
 });
 global.localStorage = require('localStorage');
-define(['js/vidmarks/dbmodel'], function(db, undefined) {
+define(['js/vidmarks/dbmodel', 'xmlhttprequest', 'rs/remoteStorage'], function(db, XMLHttpRequest, remoteStorage, undefined) {
 var suites = [];
 suites.push({
   name: "tags module",
   desc: "collections of tests for the global_tags.js module",
+  abortOnFail: true,
   setup: function(env, test) {
 
     env.records = {
@@ -51,94 +52,93 @@ suites.push({
       }
     };
 
-    requirejs([
-      'rs/lib/util',
-      'rs/remoteStorage',
-      'rs/lib/store',
-      'rs/lib/sync',
-      'rs_base/test/helper/server',
-      'rs_base/server/nodejs-example'
-    ], function(_util, remoteStorage, store, sync, serverHelper, nodejsExampleServer) {
-      util = _util;
-      curry = util.curry;
-      env.remoteStorage = remoteStorage;
-      env.store = store;
-      env.sync = sync;
+    // requirejs([
+    //   'rs/lib/util',
+    //   'rs/remoteStorage',
+    //   'rs/lib/store',
+    //   'rs/lib/sync',
+    //   'rs_base/test/helper/server',
+    //   'rs_base/server/nodejs-example'
+    // ], function(_util, remoteStorage, store, sync, serverHelper, nodejsExampleServer) {
+    //   util = _util;
+    //   curry = util.curry;
+    //   env.store = store;
+    //   env.sync = sync;
 
       // if we loaded the tag module correctly, it should have returned
       // a function for us to use.
-      test.assertTypeAnd(db, 'object');
-      test.assertTypeAnd(db.init, 'function');
+      env.remoteStorage = remoteStorage;
       env.db = db;
+      test.assertTypeAnd(db, 'object');
+      test.assertType(db.init, 'function');
 
-      console.log('serverHelper:',serverHelper);
-      env.serverHelper = serverHelper;
-      util.extend(env.serverHelper, nodejsExampleServer.server);
-      env.serverHelper.disableLogs();
-      env.serverHelper.start(curry(test.result.bind(test), true));
-    });
+    //   console.log('serverHelper:',serverHelper);
+    //   env.serverHelper = serverHelper;
+    //   util.extend(env.serverHelper, nodejsExampleServer.server);
+    //   env.serverHelper.disableLogs();
+    //   env.serverHelper.start(curry(test.result.bind(test), true));
+    // });
 
   },
   timeout: 15000,
-  takedown: function(env, test) {
-    env.serverHelper.stop(function() {
-      test.result(true);
-    });
-  },
-  beforeEach: function (env, test) {
-    // BEFORE EACH TEST
-    env.serverHelper.resetState();
-    env.serverHelper.setScope(['tags:rw', 'videos:rw']);
+  // takedown: function(env, test) {
+  //   env.serverHelper.stop(function() {
+  //     test.result(true);
+  //   });
+  // },
+  // beforeEach: function (env, test) {
+  //   // BEFORE EACH TEST
+  //   // env.serverHelper.resetState();
+  //   // env.serverHelper.setScope(['tags:rw', 'videos:rw']);
 
-    env.rsConnect = function() {
-      env.remoteStorage.setStorageInfo(
-        env.serverHelper.getStorageInfo()
-      );
-      env.remoteStorage.setBearerToken(
-        env.serverHelper.getBearerToken()
-      );
-      return env.remoteStorage.claimAccess({tags: 'rw', videos: 'rw'});
-    };
-    env.rsConnect().then(function() {
-      test.result(true);
-    });
+  //   env.rsConnect = function() {
+  //     env.remoteStorage.setStorageInfo(
+  //       env.serverHelper.getStorageInfo()
+  //     );
+  //     env.remoteStorage.setBearerToken(
+  //       env.serverHelper.getBearerToken()
+  //     );
+  //     return env.remoteStorage.claimAccess({tags: 'rw', videos: 'rw'});
+  //   };
+  //   env.rsConnect().then(function() {
+  //     test.result(true);
+  //   });
 
-  },
-  afterEach: function (env, test) {
-    env.remoteStorage.sync.needsSync('/').then(function(unsynced) {
-      // if unsynced is true, somethings wrong
-      if (unsynced) {
-        test.result(false, 'client needsSync = true, thats not good');
-      }
-      env.remoteStorage.flushLocal().then(curry(test.result.bind(test), true));
-    });
-  },
+  // },
+  // afterEach: function (env, test) {
+  //   env.remoteStorage.sync.needsSync('/').then(function(unsynced) {
+  //     // if unsynced is true, somethings wrong
+  //     if (unsynced) {
+  //       test.result(false, 'client needsSync = true, thats not good');
+  //     }
+  //     env.remoteStorage.flushLocal().then(curry(test.result.bind(test), true));
+  //   });
+  // },
   tests: [
     {
       desc: "db init",
       run: function(env, test) {
-        return env.db.init(true).then(function() {
-          test.result(true);
-        });
+        env.db.init(true);
+        test.result(true);
       }
     },
     {
       desc: "db.addVidmark / db.getAll",
       run: function(env, test) {
-        var record_id = env.records.dogsandbacon.source+'_'+env.records.dogsandbacon.vid_id;
-        return env.db.init(true).then(function() {
-          env.db.setCache('video', record_id, env.records.dogsandbacon);
-          return db.addVidmark(record_id);
-        }).then(function() {
-          return env.db.getAll().then(function (records) {
-            //console.log('TEST: getAll:result: ', records);
-            var expected = {};
-            expected[record_id] = env.records.dogsandbacon;
-            //console.log('TEST: getAll:expected: ', env.records.dogsandbacon);
-            test.assert(records, expected);
-          }, function (err) {
-            console.log('TEST: getAll: ERROR', err);
-            test.result(false, 'TEST: getAll test error: '+err);
+        var record_id = env.records.dogsandbacon.source + '_' + env.records.dogsandbacon.vid_id;
+        env.db.setCache('video', record_id, env.records.dogsandbacon);
+        env.db.addVidmark(record_id, function (err) {
+          env.db.getAll(function (err, records) {
+            if (err) {
+              console.log('TEST: getAll: ERROR', err);
+              test.result(false, 'TEST: getAll test error: '+err);
+            } else {
+              //console.log('TEST: getAll:result: ', records);
+              var expected = {};
+              expected[record_id] = env.records.dogsandbacon;
+              //console.log('TEST: getAll:expected: ', env.records.dogsandbacon);
+              test.assert(records, expected);
+            }
           });
         });
       }

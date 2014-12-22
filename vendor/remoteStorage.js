@@ -1,5 +1,5 @@
 /** remotestorage.js 0.11.1-pre, http://remotestorage.io, MIT-licensed **/
-define([], function() {
+define(['bluebird'], function(Promise) {
 
 /** FILE: src/remotestorage.js **/
 (function (global) {

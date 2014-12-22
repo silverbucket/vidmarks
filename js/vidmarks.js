@@ -10,13 +10,13 @@ define(['rs/remoteStorage', 'js/plugins',
         function(remoteStorage, plugins, nav, vidAPI, db) {
   var pub = {};
   var _ = {};
-console.log('nav: ', nav);
-console.log('db: ', db);
+
   pub.init = function() {
     console.log('Vidmarks being inited');
     nav.init(['list']);
     nav.toggle('list');
-    db.init().then(function() {
+
+    db.init(false, function () {
 
       db.onAction('change', function(event) {
         console.log('DB.onAction EVENT: ', event);
@@ -305,19 +305,20 @@ console.log('db: ', db);
     }
     return tags.join(', ');
   };
-  _.getTagSuggestions = function(word) {
+  _.getTagSuggestions = function(word, cb) {
     console.log('getSuggestions for '+word);
-    var tags = db.getAllTags();
-    var reg = new RegExp("^"+word+"\\w*");
-    var suggestions = [];
-    var numTags = tags.length;
-    for (var i = 0; i < numTags; i++) {
-      if (reg.test(tags[i])) {
-        suggestions.push(tags[i]);
+    db.getAllTags(function (err, tags) {
+      var reg = new RegExp("^"+word+"\\w*");
+      var suggestions = [];
+      var numTags = tags.length;
+      for (var i = 0; i < numTags; i++) {
+        if (reg.test(tags[i])) {
+          suggestions.push(tags[i]);
+        }
       }
-    }
-    console.log('- suggestions: ', suggestions);
-    return suggestions;
+      console.log('- suggestions: ', suggestions);
+      cb(null, suggestions);
+    });
   };
 
   /*

@@ -14,9 +14,13 @@
   "homepage": "http://github.com/silverbucket/vidmarks",
   "devDependencies": {
     "jaribu": "^0.2.2",
-    "localStorage": "*"
+    "localStorage": "*",
+    "xmlhttprequest": "^1.6.0"
   },
   "scripts": {
     "test": "node_modules/.bin/jaribu"
+  },
+  "dependencies": {
+    "bluebird": "^2.4.2"
   }
 }

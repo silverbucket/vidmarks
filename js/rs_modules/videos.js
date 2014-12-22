@@ -3,20 +3,19 @@ if (typeof define !== 'function') {
 }
 
 define(['rs/remoteStorage'], function (remoteStorage) {
-  var curry = remoteStorage.util.curry;
-  var asyncEach = remoteStorage.util.asyncEach;
+  var moduleName = 'videos';
 
-  remoteStorage.defineModule('videos', function (privateClient, publicClient) {
-    var moduleName = 'videos';
+  remoteStorage.defineModule(moduleName, function (privateClient, publicClient) {
 
     privateClient.declareType('video', {
       "description" : "a reference to a place you'd like to return to at some point.",
       "type" : "object",
+      "required": [ "title" ],
+      "additionalProperties": false,
       "properties": {
         "title": {
           "type": "string",
           "description": "the title of the place the video points to",
-          "required": true
         },
         "embed_url": {
           "type": "string",
@@ -51,41 +50,15 @@ define(['rs/remoteStorage'], function (remoteStorage) {
         },
         "video_data": {
           "type": "binary",
-          "description": "actual binary video data",
-          "required": false
+          "description": "actual binary video data"
         }
       }
     });
 
     return {
-      name: moduleName,
-
-      dataHints: {
-        "module" : "Store video data metadata",
-
-        "objectType video": "a reference to a place you'd like to return to at some point.",
-        "string video#title": "the title of the place the video points to",
-        "string video#embed_url": "location video points to for embedding purposes",
-        "string video#visit_url": "location video points to for browsing to",
-        "text video#description": "description of the video",
-        "string video#thumbnail": "thumbnail image of the video",
-        "int video#duration": "duration of the video in seconds",
-        "string video#source": "source of video (ie. youtube, vimeo, local)",
-        "string video#content_type": "the mimetype ie. application/x-shockwave-flash",
-        "binary video#data": "actual binary video data"
-      },
 
       exports: {
 
-        // remoteStorage.bookmarks.on('change', function(changeEvent) {
-        //   if(changeEvent.newValue && changeEvent.oldValue) {
-        //    changeEvent.origin:
-        //      * window - event come from current window
-        //            -> ignore it
-        //      * device - same device, other tab (/window/...)
-        //      * remote - not related to this app's instance, some other app updated something on remoteStorage
-        //   }
-        // });
         on: privateClient.on,
 
         getIds: function() {
