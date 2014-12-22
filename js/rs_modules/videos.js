@@ -1,15 +1,13 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-define(['rs/remoteStorage'], function(remoteStorage) {
 
+define(['rs/remoteStorage'], function (remoteStorage) {
   var curry = remoteStorage.util.curry;
   var asyncEach = remoteStorage.util.asyncEach;
 
-  remoteStorage.defineModule('videos', function(privateClient, publicClient) {
+  remoteStorage.defineModule('videos', function (privateClient, publicClient) {
     var moduleName = 'videos';
-    privateClient.use('');
-    publicClient.use('');
 
     privateClient.declareType('video', {
       "description" : "a reference to a place you'd like to return to at some point.",

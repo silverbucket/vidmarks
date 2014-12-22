@@ -2,15 +2,13 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
-define(['rs/remoteStorage'], function(remoteStorage) {
+define(['rs/remoteStorage'], function (remoteStorage) {
   var curry = remoteStorage.util.curry;
   var asyncEach = remoteStorage.util.asyncEach;
 
-  remoteStorage.defineModule('tags', function(privateClient, publicClient) {
+  remoteStorage.defineModule('tags', function (privateClient, publicClient) {
     //"use strict";
     var moduleName = 'tags';
-    privateClient.use('');
-    publicClient.use('');
 
     privateClient.declareType('tag', {
       "description": "a method of tracking tags and references to the module records that they've been related to",

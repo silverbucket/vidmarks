@@ -10,7 +10,8 @@ define(['rs/remoteStorage', 'js/plugins',
         function(remoteStorage, plugins, nav, vidAPI, db) {
   var pub = {};
   var _ = {};
-
+console.log('nav: ', nav);
+console.log('db: ', db);
   pub.init = function() {
     console.log('Vidmarks being inited');
     nav.init(['list']);

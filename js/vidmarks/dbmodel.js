@@ -15,16 +15,15 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
   pub.init = function(noUI) {
     console.log('- DB: init()');
     //remoteStorage.util.setLogLevel('debug');
-    return remoteStorage.claimAccess({ 'videos': 'rw', 'tags': 'rw' }).
-      then(function() {
-        if (!noUI) {
-          remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
-        }
-        // FOR DEBUGGING:
-        remoteStorage.schedule.disable();
+    remoteStorage.access.claim('videos', 'rw');
+    remoteStorage.access.claim('tags', 'rw');
 
-      _.modules.videos    = remoteStorage.videos;
-      _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
+    if (!noUI) {
+      remoteStorage.displayWidget('remotestorage-connect'); // after that (not before that) display widget
+    }
+
+    _.modules.videos    = remoteStorage.videos;
+    _.modules.tags      = remoteStorage.tags.getPrivateListing('videos');
 /*
       // testing events, changing, behavior
       _.modules.videos.on('error', function(err) {
@@ -60,7 +59,6 @@ define(['rs/remoteStorage', 'js/rs_modules/global_tags', 'js/rs_modules/videos']
         }
       });
 */
-    });
 
   };
 
